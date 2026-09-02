@@ -69,9 +69,9 @@ Hybrid-Review-My-Paper 解决学术论文审查中的四个核心问题：
 
 | 子模块 | 作用 |
 |--------|------|
-| `deep-reasoning` | 追踪关键推导链的中间步骤（η_k→g_TC、\|ρ\|²→λ_⊥、τ_c→122阶），原则"中间步骤先于结论" |
+| `deep-reasoning` | 追踪关键推导链的中间步骤（关键参数阈值），原则"中间步骤先于结论" |
 | `self-monitoring` | 区分"已追踪验证"vs"未追踪的猜测"，审查模型输出"缺公式"前先 grep 正文 |
-| `broadcast` | 对跨论文共享参数（g_TC=2.60、λ_∥=35、λ_⊥=35/3、η_k=72/35、b₀=12）建立 hub-set 追踪一致性 |
+| `broadcast` | 对跨论文共享参数建立 hub-set 追踪一致性 |
 
 **已验证效果**：CGICE 双模型审查中，v4-pro 误判"g_TC 缺公式"、Qwen3.8 追问"η_k 来源"，实际 §7.3 已有完整推导。若先执行 J-space 预检（grep 确认推导链），这两条误判可避免。
 
@@ -130,7 +130,7 @@ hybrid-review-my-paper/
 │   ├── v4pro-multi-paper-cross-review.md     # v4-pro 多论文审查协议
 │   ├── multi-paper-v4flash-thinking-review.md
 │   ├── cross-paper-gw-consistency-audit.md   # 跨论文 GW 一致性审计
-│   ├── cross-paper-sl6c-review-20260819.md   # SL(6,C) 四论文综合审查
+│   ├── cross-paper-sl6c-review-20260819.md   # 四论文综合审查
 │   ├── axiom-count-drift-and-renumbering.md  # 公理计数漂移 + 重编号
 │   ├── lean-arithmetic-audit-patterns.md     # Lean 算术审计模式
 │   └── ... (共 83 个)
