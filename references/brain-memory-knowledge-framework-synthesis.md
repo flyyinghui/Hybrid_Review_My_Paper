@@ -67,7 +67,7 @@ Comprehensive markdown document (~15-25KB) with:
 
 **Session 2026-07-28**: Deng-Hani + neural memory brain knowledge framework. 
 - 8 brain queries across 5 domains (kinetic theory, Birman-Schwinger, cluster expansion, KLS spectral gap, Boltzmann hierarchy)
-- 3 Lean formalization files read from /mnt/d/ai_for_science/formal-proof/
+- 3 Lean formalization files read from ~/ai_for_science/formal-proof/
 - 170,575 neuron brain with ~400 Deng-Hani concepts
 - Output: 21KB comprehensive MD with 6 sections, ASCII framework diagram, 6 conclusions, 8 open problems
 - Delivered via weixin MEDIA path

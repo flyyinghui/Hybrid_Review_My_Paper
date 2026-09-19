@@ -103,7 +103,7 @@ with open(output_path, 'w') as f:
 
 Copy to desktop:
 ```bash
-cp /tmp/triple_paper_hybrid_review_*.md "/mnt/c/Users/Think/Desktop/三论文混合审阅_*.md"
+cp /tmp/triple_paper_hybrid_review_*.md "~/Desktop/三论文混合审阅_*.md"
 ```
 
 ## Verified Run: V63+V17+V16 (2026-08-06)
