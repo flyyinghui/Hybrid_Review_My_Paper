@@ -10,7 +10,7 @@ API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 if not API_KEY:
     # Try common .env locations
     for env_path in [
-        "/mnt/d/123321/CityHDGanalysis/Spatial_Reasoning_Agent/.env",
+        "~/.hermes/.env",
         os.path.expanduser("~/.hermes/.env"),
     ]:
         if os.path.exists(env_path):
