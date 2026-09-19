@@ -121,7 +121,7 @@ content = resp.choices[0].message.content
 
 Save to `/tmp/triple_paper_hybrid_review_v4pro.md` AND copy to Desktop:
 ```bash
-cp /tmp/triple_paper_hybrid_review_v4pro.md "/mnt/c/Users/Think/Desktop/三论文混合审阅_v4pro_YYYYMMDD.md"
+cp /tmp/triple_paper_hybrid_review_v4pro.md "~/Desktop/三论文混合审阅_v4pro_YYYYMMDD.md"
 ```
 
 ## Verified Run: V63+V17+V16 (2026-08-07)

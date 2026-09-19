@@ -85,4 +85,4 @@ Two-tier approach:
 - V14 review: `Hybrid_Review_TripleGW_V14_20260806.md`
 - V15 fix checklist: `V14_to_V15_Paper_Fix_Checklist.md`
 - V15 review: `Hybrid_Review_TripleGW_V15_20260806.md`
-- All in: `C:\Users\Think\Desktop\AI论文\三峰引力波证明\三峰引力波证明_20260806\`
+- All in: `C:\Users\<user>\Desktop\papers\三峰引力波证明\三峰引力波证明_20260806\`
