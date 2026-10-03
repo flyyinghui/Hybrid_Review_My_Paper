@@ -73,3 +73,30 @@ reference adds the **reciprocal guard**: when the flagged number is inside a
 garbled sentence, first check whether the "contradiction" is real or is a
 splice of two chains, and re-derive any convention-dependent value (T_F, C₂,
 normalization) yourself before trusting the agent's recomputation.
+
+### Case 3 — Prefactor omission (V19 five-agent review, 2026-09-21)
+
+The technical reviewer claimed the RG fixed-point square should be 24π²/35, not
+the paper's 12π²/35. Independent recomputation of β(g)=ηg/2+bg³/(8π²) at the
+fixed point: η/2 = −b·g_*²/(8π²) ⇒ g_*² = −η·4π²/b = (36/35)·4π²/12 = **12π²/35** ✓.
+The reviewer dropped the **1/2 prefactor** in `ηg/2` (used −η·8π²/b = 24π²/35).
+A second agent (consistency) independently got 12π²/35, contradicting the
+technical agent and confirming the false positive.
+
+### Case 4 — Unit-conversion omission (V19, 2026-09-21; two agents erred identically)
+
+Both the technical AND consistency agents claimed a §9.3 frequency f₀ disagreed
+with its formula by a factor of 10²⁴. Independent recomputation: natural-unit
+f₀ = 1.744×10⁻³²·T_* (GeV); the paper wrote 2.65×10⁻⁸ (T_*/GeV) Hz. The gap is
+exactly the ℏ conversion (ℏ=6.582×10⁻²⁵ GeV·s): 1.744×10⁻³² × 1/ℏ = 1.744×10⁻³²
+× 1.519×10²⁴ = **2.65×10⁻⁸ Hz** ✓. Both agents missed the GeV→Hz factor 1/ℏ that
+the paper stated explicitly ("Converting the natural-unit frequency with ℏ=…").
+
+**Shared feature (the new meta-lesson):** two agents made the *same* omission
+(a prefactor, a unit conversion) simultaneously, manufacturing a
+"multi-reviewer consensus on an arithmetic error" that was itself wrong — the
+"5 agent 全部误判" trigger again, but the root cause is a shared prefactor/unit
+blind spot, not an ambiguous sentence. Before relaying any "numerical
+contradiction" as P0, re-derive the prefactors (1/2, 2, 4π, T_F) and the unit
+conversions (ℏ, c, k_B, GeV↔Hz) yourself — a unanimous panel can be unanimously
+wrong about a shared blind spot exactly as it can about a shared misreading.
