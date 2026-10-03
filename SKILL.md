@@ -7,18 +7,18 @@ description: >-
   verification, and formal peer review. AWA injects 12-specialist-agent parallel review
   at Stage 2 (Writing) and Stage 4 (Revision) for fine-grained quality improvement.
   Triggers: hybrid review, ARS+AWA pipeline, integrated paper review, full review pipeline.
-version: "1.1.0"
+version: "1.3.0"
 model: deepseek-flash
-tags: [academic-writing, peer-review, pipeline, multi-agent, hybrid]
+tags: [academic-writing, peer-review, pipeline, multi-agent, hybrid, frame-audit, prose-lint, bootloops]
 depends_on:
   - academic-pipeline
   - academic-writing-agents
   - academic-paper-reviewer
 ---
 
-# ARS + AWA Hybrid Review Pipeline v1.0
+# ARS + AWA Hybrid Review Pipeline v1.3
 
-Integrated academic paper review pipeline: **ARS backbone** (structural management + formal peer review) × **AWA injection** (granular quality review at writing/revision stages).
+Integrated academic paper review pipeline: **ARS backbone** (structural management + formal peer review) × **AWA injection** (granular quality review at writing/revision stages) × **BootLoops frame-audit** (implicature + prose-honesty + number-discipline pre-audit, v1.3).
 
 ```
 ARS RESEARCH → WRITE +[AWA Review]→ INTEGRITY → FORMAL REVIEW → REVISE +[AWA Review]→ RE-REVIEW → FINALIZE
@@ -33,9 +33,10 @@ ARS RESEARCH → WRITE +[AWA Review]→ INTEGRITY → FORMAL REVIEW → REVISE +
 | **Injection 2** | AWA Stage 4a | After revision complete → 3-5 reviewer agents on changed sections → verify fixes + catch new issues → incorporate before re-review |
 | **Formal Gate** | ARS Stage 3 | 5-person panel (EIC + R1/R2/R3 + Devil's Advocate), editorial decision, revision roadmap |
 
-## Hybrid Pipeline (12 Stages)
+## Hybrid Pipeline (13 Stages)
 
 ```
+Stage 0:  FRAME PRE-AUDIT   [BootLoops referee-sim: implicature audit] ← NEW v1.3
 Stage 1:  RESEARCH          [ARS deep-research]
 Stage 2:  WRITE             [ARS academic-paper full mode]
 Stage 2a: AWA WRITE REVIEW  [AWA: 5-7 reviewer agents parallel]  ← INJECTION 1
@@ -50,13 +51,28 @@ Stage 5:  FINALIZE          [ARS format-convert]
 Stage 6:  PROCESS SUMMARY   [ARS process record]
 ```
 
+**Stage 0（框架预审，v1.3 新增）**：任何 5-agent 事实审稿（Stage 2a/3/4a）之前，必须先跑一轮 `referee-sim` implicature 审计——审计「读者会得出什么结论」而非「句子是否真实」。事实核查（fact-checking）与框架核查（frame-checking）是两种正交审计，抓的失败互不重叠。Stage 0 抓 6 类事实核查必然漏掉的失败：摘要防火墙（body 诚实 abstract 干净）、未读答案（答案在正文但反对者早在摘要形成印象）、hedge-blur（修复削弱所有 claim 而非 scope 一次）、缺失受众（借用的方法/数据集社区没拿到审计行）、新颖性-正确性混淆（只答一轴）、友好读者/strawman（模拟审稿继承作者框架）。完整流程见 `references/referee-sim-frame-pre-audit.md`。
+
 ## Trigger Keywords
+
+- "深化开放桥" / "把开放桥往前推" / "advance open bridge" / "trivial 构造伪装推进" / "循环定义调 codim" / "recover c 循环代入" — triggers OPEN-BRIDGE DEEPENING HONESTY TRAPS: 作者做形式化证明「深化开放桥」时，警惕三个陷阱——①循环定义（把 codim 调成匹配值再证明）②校准伪装（引入自由参数设为观测值再「恢复」）③状态升级（trivial 构造标记为 [T] 定理）。作者侧自检五问 + 检测信号见 `references/open-bridge-deepening-honesty-traps.md`。
+
+- "框架预审" / "读者会得出什么结论" / "implicature" / "摘要防火墙" / "audience enumeration" / "缺失受众" / "referee-sim" / "frame audit" — triggers FRAME PRE-AUDIT (Stage 0, v1.3): 在 5-agent 事实审稿前跑 `referee-sim` implicature 审计——枚举受众（含 incumbent + borrowed-authority）→ 每受众两轴（correctness+novelty）→ steelman 三测试（sting/knowledge/lead）→ 验证答案在反对者阅读路径上 → 摘要单独冷读最后审 → 最小 scope 编辑（禁 hedge-blur）→ 裁决表。抓 6 类事实核查漏掉的失败（摘要防火墙/未读答案/hedge-blur/缺失受众/新颖性-正确性混淆/友好读者）。See `references/referee-sim-frame-pre-audit.md`.
+
+- "诚实性tell" / "数字呈现矛盾" / "舍入方向" / "情态词是数字" / "number discipline" / "捏造精确性" / "封闭区间舍入" — triggers HONESTY TELLS (B6) + NUMBER DISCIPLINE (N): B6 六条句子级诚实性 tell（捏造精确性/重要性通胀/出处错误/结果过度声称/自信模糊/封闭区间引号完整性）+ N 十三条数字呈现机械矛盾（舍入方向/减法一致/显示平局/二代舍入/情态词/标识符双向）。See `references/prose-lint-honesty-number-discipline.md`.
 
 - "审查员说数值矛盾/算术错误" / "多个审稿人一致判算术错" / "5 agent 全部误判" / "摘要歧义导致集体误读" — triggers REVIEWER ARITHMETIC FALSE-POSITIVE VERIFICATION: independently recompute the flagged arithmetic BEFORE relaying it as P0; check whether a garbled/ambiguous sentence splices two SEPARATE chains (0.46%→Ω_DE vs 5.00→5.47 case); re-derive convention-dependent values (T_F index, normalization) yourself — agents make convention errors (b₀=12 case). See `references/reviewer-arithmetic-false-positive-verification.md`.
 
+- "转换表算术" / "修复引入新错误" / "fix introduces new defect" / "正根数" / "combinatorial count" / "维度不闭合误报" — triggers FIX-INTRODUCES-NEW-DEFECT + COMBINATORIAL-COUNT FALSE-POSITIVE: (a) 修复新增的转换表/归一化表每个格子须按声明恒等式逐格验证（`3(B−L)=3·q_{B₆}` 案例 N_R 列 −3/2 应为 −3，×2 因子错）；(b) 审稿人报"维度不闭合/重数错"时先自算组合量（Aₙ 正根 = n(n+1)/2，A₅=15 非 5，dim=5+15·2=35 闭合）。See `references/fix-introduces-new-defect-conversion-table-arithmetic.md`.
+
 - "计数不一致" / "定理名不一致" / "grönwall vs gr" / "审稿代理被清单误导" / "technical 代理符号算错" / "点积对称性" — triggers LEAN-INVENTORY-REGEX + SYMBOL-ERROR FALSE-POSITIVE: when a reviewer reports a count/name/sign mismatch, FIRST grep the source file to verify the reviewer-quoted value actually exists AND check whether the intermediate Lean-theorem inventory fed to reviewers was truncated by a `[A-Za-z0-9_]` regex (Unicode identifiers ξ/ö get truncated → phantom count/name mismatches). Also re-derive dot-product symmetry (∫∇ξ·j = ∫j·∇ξ) yourself — technical agents make sign errors. See `references/reviewer-false-positive-lean-regex-and-symbol-errors.md`.
 
-- "hybrid review my paper"
+- "两份修改建议哪个更有优势" / "对比评价修改方案" / "从数学基础完备性/定理推导严密性/阐释自洽性评估" / "给融合修改意见" / "competing proposal evaluation" — triggers COMPETING-PROPOSAL COMPARATIVE EVALUATION: 先识别两份提案的「性质」（激进重构派 vs 严格条件派），再按三维度（数学基础完备性/定理推导严密性/阐释自洽性）打分，判据核心=证据层级诚实性（[S]是否真编译、所谓推导是否循环校准、范畴错误是否被抓）。融合输出=严格条件派的诚实框架作脊柱 + 激进派的正确数值纠错作补丁 + 降格过度声称。含 8 条决定性技术检查清单（能量非电荷/Wasserstein对称不能产生箭头/SM单态无反常/诱导引力系数(1/6−ξ_conf)共形耦合处为零/ CW系数是超迹非计数/ M_R=sqrt(G⁻¹)=普朗克质量混淆/ 反例构造决定性）。See `references/competing-proposal-evaluation.md`.\n\n- "hybrid review my paper"
+- "适不适合投 X 期刊" / "评估是否适合投稿 Foundations of Physics" / "venue-fit" / "投稿适配性终审" — triggers VENUE-FIT PUBLICATION-STRATEGIST REVIEW: 5 代理换为 consistency+technical+logic+lean_specialist+publication-strategist；publication 代理按期刊格式合规清单（摘要 150-250 词 / 关键词 4-6 个 / 三级十进制标题 / .tex 源 / AI 披露）+ 科学门槛（至少一个真实动力学工作包）判 READY / MAJOR REVISION / NOT READY。注意「诚实性 vs 技术严谨性分裂」（诚实标注未同步到 Lean 代码层）。See `references/venue-fit-publication-strategist-review.md`.
+- "投稿适配性终审" / "评估是否适合投稿" / "评估适不适合投某期刊" / "journal fit" / "Foundations of Physics 适配性" — triggers PUBLICATION VENUE-FIT FINAL REVIEW: 5 代理替换为 consistency/technical/logic/lean_specialist/**publication-strategist**（核查期刊格式：摘要词数/关键词数/章节层级/.tex 源/AI 披露 + 科学门槛 + READY/MAJOR/NOT READY 建议）。See `references/publication-fit-review-and-arithmetic-p0-fix.md`.
+- "编译通过但数学错误" / "ouCov 因子2" / "metzler 比例写反" / "观测输入伪装成谱定理" / "诚实化双向脱节" / "正文公式正确但 Lean 定义错误" — triggers ARITHMETIC-P0-FIX: 三类硬算术错误（因子2/比例方向写反/谱定理伪装）+ 正文文字层诚实化 vs Lean 代码层脱节检测 + 删除公理链后 grep 残留/编译/同步附录 A 统计协议。See `references/publication-fit-review-and-arithmetic-p0-fix.md`.
+- "MD-Lean 一致性" / "核查论文md和lean的计数" / "验证md和lean一致性" / "幻影引用机器验证" — triggers MD-LEAN CONSISTENCY MACHINE VERIFICATION: 先机器验证（grep 交叉核对计数/定理名/数值，剥离注释后行首锚定）再 LLM 审稿；传给审稿人的定理名清单必须完整（截断=假阳性）；计数漂移（插新定理后附录 A 未同步）检测。See `references/md-lean-consistency-machine-verification.md`.
+- "编译状态表述遗漏" / "改了编译状态但审稿报矛盾" / "pending local build 残留" / "声明计数改了但别处没同步" — triggers COMPILATION-STATUS-CLAIM SYNC: 修改"编译状态/编译通过/0 sorry/声明计数"类元声明时，必须 grep 全文所有残留关键词（pending/not claimed/not asserted/compilation status/final compilation/not been compiled）一次性改干净——这些表述分散在摘要、§1 标签表、各章节 Lean 验证段、附录 A、Materials 段，容易遗漏（V19 案例：改 §1+附录 A 漏 §9.2，被 consistency 代理报 P0 内部矛盾）。See `references/compilation-status-claim-sync.md`.
 - "ARS + AWA pipeline"
 - "integrated paper review"
 - "full review pipeline with writing quality"
@@ -67,7 +83,19 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 - "compare five versions" / "multi-version comparison" / "V{N} V{M} V{K} comparison" — triggers FIVE-VERSION COMPARATIVE REVIEW with 2 dimension-specialized agents (logic+math, testability+evolution). See `references/five-version-comparative-review.md`.
 - "cross-check GW consistency" / "compare GW peaks" / "两篇论文GW表述" — triggers CROSS-PAPER GW CONSISTENCY AUDIT across papers sharing SL(6,C) foundation. See `references/cross-paper-gw-consistency-audit.md`.
 - "频率比当温度比" / "等效温度算错" / "hf/kB 换算" / "多版本数值残留" / "旧频率比 10² 残留" — triggers two V17-era patterns: (a) frequency↔temperature ratio confusion (f-ratio mislabeled as T-ratio via hf/k_B, 3.44K vs 21.6K case) → see `references/math-calculation-accuracy-review.md` §10; (b) multi-version-fix numerical residue (one section FIX-annotated but sibling sections still use old values → internal self-contradiction) + "母框架已诚实标注不闭合但论文正文仍称闭合" overclaim. See `references/triple-gw-v17-review-record.md`.
+- "公式序号重排" / "字母后缀公式乱序" / "9a 9b 9c 夹在连续编号" / "equation renumbering" / "tag 编号不连续" — triggers EQUATION RENUMBERING: 审稿意见整合在 §X 主体后插新子节，新子节公式用父公式后缀编号（9a/9b/9c、12a/12b/12c）导致乱序；修复=按出现顺序连续重编号，正文引用用精确上下文替换（禁用全局正则，会误伤 SL(6)/SU(6)/U(1) 群符号数字、参考文献年份 (1973)、函数值 P(0)/Q(0)）。含 def 计数 noncomputable 陷阱 + A₅ 正根数 15 审稿误判案例。See `references/equation-renumbering-alphabetical-suffix.md`.
+
+- "表述层无限循环" / "P2/P3 修不完" / "7.5 分收尾" / "还要不要跑下一轮复审" — triggers PROSE-LAYER INFINITE-LOOP JUDGMENT: 四轮复审后 P0/P1 连续清零、五维度 ≥7.0、核心卖点(0公理/0sorry/真编译/黄金门控)从未被击穿、新发现全是 P2/P3 表述层 → 应收尾(生成交付版+更新memory)，不要再跑第 5 轮（P2/P3 每轮都能挑出新瑕疵，会无限递归）。含复审执行配方(deepseek-flash 串行+增量落盘+逐条fixed/remain/partial)、审稿人误判纠正(restricted-root 正根数 15≠5)、归一化转换表算术连带错误。See `references/prose-layer-infinite-loop-judgment.md`。
+
 - "启动Hybrid-review-my-paper技能" / "采用deepseek-v4-pro(最大tokens)推理" / "三篇论文相互推导结论的一致性" — triggers V4-PRO MULTI-PAPER CROSS-REVIEW.
+
+- "公式序号重排" / "字母后缀乱序" / "公式编号连续化" / "多轮复审收尾" / "文献精化无限循环" / "复审收敛判断" / "转换表算术错误" / "多归一化转换表" / "归一化转换表逐行验算" — triggers ITERATIVE-REVIEW-CONVERGENCE & MD-CLEANUP: 四轮复审收敛规律(6.2→7.1→7.3→7.5，每轮新发现 severity 递减 P0→P1→P2/P3) + 收尾判断标准(评分≥7.0 且 5 维度均衡 + P0/P1 连续两轮清零 + 核心卖点未被击穿 = 不再追 P2/P3) + 公式字母后缀→连续编号重排(先 \tag 按出现顺序映射，再正文引用用精确上下文字符串替换，避开群符号 SL(6)/SU(6)/U(1)/年份/函数值 P(0)) + 多归一化转换表逐行独立验算(3(B−L)=3q_{B_6} 每行核对，N_R −3/2→−3 案例)。See `references/iterative-review-convergence-and-md-cleanup.md`.
+
+- "编译状态矛盾" / "多处未编译残留" / "正文声称编译通过但附录说未编译" / "compilation status inconsistency" / "grep 未编译变体" — triggers COMPILATION-STATUS CONSISTENCY: 手稿被外部进程（sibling subagent）扩展后，编译状态在正文多处残留"未编译"（has not been compiled / was not compiled / uncompiled / No Lean compilation / No compilation performed / not executed here / compilation status must be checked），与编译成功事实矛盾，五代理审查中 consistency+writing+logic 三代理会同时报 P0。用 `grep -niE "compil|uncompiled|not executed"` 一次抓全变体统一更新。见 references/compilation-status-consistency.md。
+
+- "编译状态表述多处同步" / "pending 残留" / "编译通过但正文仍写待编译" / "一处说 pending 一处说 0 errors" — triggers COMPILATION-STATUS HONESTY SYNC: 编译状态诚实性表述分布在多处（§1 标签表 / 具体定理节正文 / 附录 A 核查段），更新为"已编译"时必须 grep 全部变体（pending/not claimed/not asserted/final compilation status/stopped after elaboration/...）并逐处替换，否则内部自相矛盾被 consistency-checker 抓 P0。See `references/compilation-status-honesty-sync-multi-location.md`.
+
+- "deepseek-v4-pro推理，deepseek-v4-flash撰写" / "双LLM模式" / "v4-pro推理 + v4-flash撰写报告" — triggers DUAL-LLM REVIEW MODE: v4-pro thinking 深度推理 → 提取 content（非空则用 content，空则回退 reasoning_content）→ v4-flash(thinking=disabled) 撰写结构化终审报告。两段串行 ~5.5 分钟（v4-pro 28K/302s + v4-flash 8K/17s）。See `references/dual-llm-v4pro-reason-v4flash-write.md`.
 
 - "三阶段是否遵循CGICE方程" / "语言借用vs方程遵循" / "动力学遵循度" / "以CGICE基准审查" / "子论文是否由母框架方程驱动" — triggers CGICE-BASELINE PHASE-COMPLIANCE REVIEW: 跨论文审查维度，区分「语言借用(language borrowing)」vs「方程遵循(equation following)」，三阶段各判 follows/partial/language_only。标志性红旗「closed dynamical system replacing ΛCDM」+ 诚实标注与过强措辞并存。See `references/cgice-baseline-phase-compliance-review.md`。
 
@@ -78,16 +106,24 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 - "参考文献核验" / "核验参考文献" / "幻影引用" / "孤儿引用" / "reference verification" — triggers REFERENCE-LIST MACHINE VERIFICATION: 正则提取正文 [N] 引用 vs 列表条目，排除数学区间（κ∈[10,100] 误报）与双横线范围引用（[1--5]），输出幻影/孤儿/编号连续三类判定。See `references/reference-list-machine-verification.md`.
 
 - "复审" / "re-review" / "带前轮P0清单复审" / "对抗性对照复审" / "逐条判定fixed/remain/partial" — triggers RE-REVIEW WITH ADVERSARIAL DEFECT-LIST INJECTION: 串行 5 代理直调 `deepseek-flash`（thinking=disabled）复审修订稿，前轮 P0–P3 清单作为对抗性上下文，要求每缺陷输出 fixed/remain/partial 判定，汇总为 已修复/未修复/部分修复 + 本轮新发现。完整执行配方（模型名、JSON 契约、~16-20s/代理串行、聚合规则、Lean 注释剥离计数）见 `references/rereview-adversarial-defect-list-execution.md`。
+
+- \"评分收敛\" / \"P2/P3 无限递归\" / \"复审何时收尾\" / \"四轮复审轨迹\" — triggers REVIEW SCORE CONVERGENCE: 多轮复审的评分轨迹（6.2→7.1→7.3→7.5）、P0/P1 清零后 P2/P3 每轮重新出现的无限递归现象，以及收尾判据（评分跨越接受线 + P0/P1 连续清零 + 核心卖点稳固 + 五维度均衡 → 建议收尾而非无限修表述层）。见 `references/review-score-convergence-and-p2p3-infinite-recursion.md`。
+
+- "P2/P3无限循环" / "复审收敛" / "评分稳定但每轮都有新P2/P3" / "要不要继续修表述层" — triggers REVIEW-CONVERGENCE-STOPPING RULE: 当 P0/P1 连续两轮清零 + 评分稳定跨越接受线（~7.0，Foundations of Physics）+ 核心卖点（0 公理/0 sorry/真编译/#print axioms 黄金门控）多轮审查从未被击穿时，剩余的 P2/P3 是**表述/文献精化的无限递归**——每轮审稿人都能挑出新瑕疵（[N] 缺作者年份、NuFit 版本号、摘要边界句措辞、E_{6w} 定义、表格分隔符），评分提升递减（7.3→7.5 仅 +0.2），且 P3 数量会从 11 膨胀到 31。此时应**主动建议收尾**（生成交付版 + 更新 memory），而非继续"修 P2/P3 → 再审 → 又发现新 P2/P3"的死循环。判据：P0/P1=0 且 `#print axioms` 干净且核心推导链未被击穿 → 收尾。V64 四轮实测：6.2→7.1→7.3→7.5，第 4 轮五维度全 7.5 且 bibliography 从 6.5 跃升 7.5，之后停止。
 - "分支比解耦" / "存在性定理" / "existence proof" / "引入参数闭合两个观测量" / "反向工程自由参数" / "covariant mass-transfer dynamic" — triggers EXISTENCE-PROOF-REVERSE-ENGINEERING DETECTION: 当作者/审稿人提议「引入参数 X 同时闭合两个观测量」时，检查 X 的定义式是否把观测值写进分子（f_DE = 0.682/(...) 中的 0.682 即待解释的 Ω_DE）；∃-存在性定理在数学上平凡（任何目标值都可被一个自由参数吸收），存在性 ≠ 动力学闭合；清洁的 0-sorry 代数证明不能拯救物理过度声称。另含 smoke-test 断言陷阱（`assert 'OK' in smoke` 失败，deepseek-flash 不原样回显，应 `assert smoke` 非空）。见 `references/existence-proof-reverse-engineering-detection.md`。
 
-- "清除历史版本残留" / "参考文献重建" / "公理计数统一" / "投稿前清理 md+lean" / "把关键公式标注序号" — triggers PREPRINT-SUBMISSION CLEANUP: 投稿前清理完整方法论——历史版本残留清除（[Vxx correction]/WITHDRAWN/日期戳/审查记录段落，含小写 withdrawn 保留、附录误删恢复）、参考文献重建（范围引用展开/幻影 vs 孤儿/作者名补编号）、公理计数统一（多重矛盾口径→实测）、纯文本 md 公式编号、lean 注释清理 + 活跃代码完整性验证。See `references/preprint-submission-cleanup.md`. 三类痕迹精确分类（历史版本/修改时间/修改错误）+ 删工作日志留诚实声明(withdrawn/not an active declaration)的判断原则 + str.replace 改写句子产生重复的陷阱（new_string 带入原文后续内容，Cosmic Noon 案例）：`references/revision-mark-cleanup-rewrite-duplication.md`.
+- "清除历史版本残留" / "参考文献重建" / "公理计数统一" / "投稿前清理 md+lean" / "把关键公式标注序号" — triggers PREPRINT-SUBMISSION CLEANUP: 投稿前清理完整方法论——历史版本残留清除（[Vxx correction]/WITHDRAWN/日期戳/审查记录段落，含小写 withdrawn 保留、附录误删恢复）、参考文献重建（范围引用展开/幻影 vs 孤儿/作者名补编号）、公理计数统一（多重矛盾口径→实测）、纯文本 md 公式编号（字母后缀乱序→连续重排的精确替换法见 references/equation-renumbering-letter-suffix-to-sequential.md）、lean 注释清理 + 活跃代码完整性验证。See `references/preprint-submission-cleanup.md`. 三类痕迹精确分类（历史版本/修改时间/修改错误）+ 删工作日志留诚实声明(withdrawn/not an active declaration)的判断原则 + str.replace 改写句子产生重复的陷阱（new_string 带入原文后续内容，Cosmic Noon 案例）：`references/revision-mark-cleanup-rewrite-duplication.md`.
 
 - "删除修正过去版本内容的论述" / "按PRD体例重构" / "精简版本修正论述" / "优化科技论文文字" / "投稿前清理" — triggers VERSION-COMMENTARY STRIP + PRD RECONSTRUCTION: the pre-review cleanup workflow — strip [V17 FIX]/[WITHDRAWN]/date-stamps/cross-refs/honest-axiom notes, resolve the contradictions the commentary was masking (fossilized-GW vs withdrawn DM=GW, dual numeric values), rebuild to standard PRD skeleton, THEN run the 5-agent review. See `references/version-commentary-strip-prd-reconstruction.md`. Single API call with 8-axis matrix + 5-section output. Use when user explicitly requests v4-pro or cross-paper consistency audit across 3+ papers. See `references/v4pro-multi-paper-cross-review.md`.
 - "系列论文审查" / "统一框架文档" / "母框架" / "跨论文参数不一致" / "同一系列多篇论文" — triggers UMBRELLA-FRAMEWORK PREREQUISITE: 审查共享同一理论框架的系列论文前，必须先查找并加载母框架文档，否则会把框架内角色分工（UV/IR 跑动两端、双分量谱隙、双实形式）误判为跨论文 P0 矛盾。另含 v4-flash 幻觉论文编号 + 审计脚本嵌套块注释 sorry 假阳性两个陷阱。See `references/multi-paper-umbrella-framework-prerequisite.md`.
 - "表演性诚实" / "honest-axiom 是注释不是属性" / "公理计数矛盾" / "revision 只是加标签" — triggers PERFORMATIVE-HONESTY DETECTION: check whether claimed `@[honest_axiom]`/`@[phenomenological]` attributes are REAL Lean attributes or commented-out text, recount axiom/line stats against the actual file, verify circularity wasn't just migrated axiom→def. See `references/performative-honesty-detection.md`.
 
+- "诚实化只落在正文" / "正文已诚实但Lean未同步" / "body-Lean divergence" / "honestification asymmetry" / "正文写-2ℓt但Lean仍-ℓt" / "保守Metzler谱界" / "迹配对不正定" — triggers HONESTIFICATION-ASYMMETRY DETECTION: 当诚实性评分(7.5)≈技术/形式化评分(3.5-4.5)的2倍时，诚实化只落在正文文字层、未传导到Lean代码层。检测：正文每处"已修正"值，grep Lean的旧值（如正文 e^{-2ℓt} vs Lean exp(-ell*t)）。附带可复用数学事实：保守Metzler生成元(列和为零)谱界=0(主特征值≠5.47)；B=Re tr(XY)在sl(6,C)上不正定(须限su(6)用⟨X,Y⟩=-Re tr(XY))。See `references/honestification-asymmetry-body-vs-lean.md`.
+
 - "权威Lean声明计数" / "axiom数不一致" / "附录计数vs实测" / "def vs noncomputable def" / "grep行首计数" / "108 axiom vs 110" — triggers LEAN-DECLARATION-COUNT AUTHORITATIVE METHOD: use line-anchored `grep -cE '^\s*axiom\s'` (NOT `grep -c "^axiom "` which undercounts indented, NOT Python regex which overcounts decoration) as ground truth; def total splits into plain def + noncomputable def (126 = 86 + 40); align appendix self-reported count for EVERY declaration type (structure/class drift too). See `references/lean-declaration-count-authoritative-method.md`.
+- "0 axiom是文本统计还是内核验证" / "文本计数≠lake build" / "声称0 axiom但编译失败" / "AI生成Lean证明未编译" / "lake build验证0 axiom" — triggers TEXT-COUNT VS KERNEL-VERIFICATION: a text-level "0 axiom / 0 sorry / N theorem" (strip nested block comments + line-anchored grep) matching the paper's Appendix A self-report is NOT kernel verification — `lake build` may still fail with dozens of tactic-level proof-body errors (field_simp/ring/linarith/simpa not closing, whnf heartbeat timeout, Type mismatch, metavariable, unknown-constant cascade). The paper's honest "not compiled" claim is accurate but means the formalization is UNVERIFIED until `lake build` passes; `#print axioms` also requires a successful compile. Full error→theorem mapping methodology + V19 case (30 errors / 20 theorems) in `mathlib-offline-build/references/lake-build-verification-vs-text-count.md`.
 - "把所有假等式公理改成def" / "假实数等式axiom改def" / "axiom改def修复" / "log值假等式" — triggers FALSE-EQUALITY-AXIOM→DEF REPAIR: 孤立公理（grep 名字 1 次=零引用）+ 假等式（十进制近似当精确）→ 改 `def 名 : ℝ := 数值`（保留数值、消除假声明），而非删除；含幻影占位声明诚实标注、编译验证、计数一致性核对。See `references/false-equality-axiom-to-def-repair.md`.
+- "编译通过但数学错误" / "正文写对但Lean没同步" / "公理伪装谱定理" / "隐含假设未披露" / "历史方程残留" / "投稿适配性终审" / "评估是否适合投稿某期刊" / "5代理终审" — triggers PAPER-LEAN P0 HARD-ERROR FIX PATTERNS: 五类「编译通过但数学错误」的 P0 修复（正文-Lean 双向脱节 / 公理伪装谱定理→targetRatio def / 比例方向写反 / 隐含假设未披露→注释诚实披露不删定理 / 历史方程残留→基准对齐+历史版本标注）+ 5 代理投稿适配性终审配方（consistency/technical/logic/lean_specialist/publication 角色分工 + 编译独立复现 + 诚实性 vs 技术严谨性分裂诊断）。See `references/paper-lean-p0-hard-error-fix-patterns.md`.
 - "axiom签名引用的类型零定义却编译通过" / "grep 类型名只出现1次" / "#check 模块外 unknown identifier 但 lake build 成功" / "autoImplicit 幻影" / "签名里 UndefinedType" — triggers LEAN AUTOIMPLICIT PHANTOM-TYPE DETECTION: Lean 4 `autoImplicit`（默认开）把 axiom 签名里的未知类型标识符静默当作隐式绑定变量，`lake build` 成功但该类型全文件零定义。检测三步：grep 类型名计数=1 → 模块外 `#check` 报 unknown identifier → 最小复现确认 autoImplicit 机制。判定=「签名类型计数1 + 模块外#check失败 + lake build成功」。修复=删除悬空 axiom（死代码）。比已知「theorem 证明体引用未定义名直接编译失败」更隐蔽。See `references/lean-autoimplicit-phantom-type-reference.md`.
 - "axiom 签名含未定义类型" / "phantom axiom signature" / "编译通过但符号零定义" / "autoImplicit" — triggers LEAN-AUTOIMPLICIT-PHANTOM-AXIOM: Lean 4 `autoImplicit` 把 axiom 签名中未定义的标识符当作隐式自动绑定变量（编译通过、无数学内容、零引用死代码）。检测三步：grep 符号名计数==1 → 模块外 `#check` 报 unknown identifier → 最小文件复现编译通过。见 `references/lean-autoimplicit-phantom-axiom-signature.md`。
 
@@ -107,7 +143,13 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 - "多论文评分表" / "幻觉论文编号" / "漏掉某篇论文" — PITFALL: v4-flash generating a multi-paper score table HALLUCINATES paper labels (real case: dropped CGICE V9.1, invented a non-existent "V18", mislabeled each paper's role). Fix: in the review prompt, enumerate every paper by exact name + role + key params (e.g. "1. CGICE V9.1 = dynamics core, 73 axioms; 2. V17 = geometry base..."), and require the score table to cover EXACTLY those N names. Verify the table has N rows before saving.
 - "对所有具体数学计算结论是否准确给出评审" / "数学计算结论准确性" / "数值是否算对" / "verify all numerical/calculation conclusions" — triggers MATH-CALCULATION-ACCURACY REVIEW: extract every numerical claim (incl. table cells + Lean numeric-assertion comments), independently recompute each (Python precise calc + hand algebra), classify into ✅arithmetic-correct / 🔴P0 calc-error / 🟠P1 internal-inconsistency / 🟡P2 statement. Core insight: definitional arithmetic (τ, α reciprocity, ln values, powers) is almost always right; numbers carrying physical predictions (N_e, g_TC flow, Landau pole, μ_crit, |ρ|², H₀t₀) are where errors cluster. See `references/math-calculation-accuracy-review.md`.
 - "import 属性文件缺失" / "@[honest_axiom] 但注册文件不存在" / "表演性诚实 v2" / "import HonestAttr" / "红移公式反推" / "f = f₀·e^(-N_e)" / "指数衰减差数量级" — triggers IMPORT-GHOST-ATTRIBUTE + REDSHIFT-REVERSE-CHECK: (a) 表演性诚实新变体——@[honest_axiom] 从注释升级为活跃属性 + 头加 `import HonestAttr`，但 HonestAttr.lean 注册文件不存在→无法编译+属性未注册；三步检测(grep import→find 注册文件→编译验证)。(b) 指数红移公式 f_obs=f₀·e^(-N_e) 的独立重算 + 反推 N_e=ln(f₀/f_obs) 对比论文声称值，差数量级即"校准伪装成推导+算术错误"。See `references/import-ghost-attribute-and-redshift-reverse-check.md`.
+- "维度不闭合" / "multiplicity 维度账" / "restricted root multiplicity" / "对称空间维数" / "正根数" — triggers SYMMETRIC-SPACE DIMENSION FALSE-POSITIVE: 审稿人声称维度不闭合时，先独立重算 dim = rank + 正根数×multiplicity（A_n 正根数 = n(n+1)/2，不是 rank；SL(6,C)/SU(6) = 5 + 15×2 = 35 闭合）。See `references/symmetric-space-dimension-false-positive.md`.
+
 - "多个审稿人同时报告数值矛盾" / "agent 集体误判" / "摘要数值矛盾" / "独立核验 agent 数值发现" / "数值 agent 重算错了" — triggers AGENT-FALSE-POSITIVE + INDEPENDENT-VERIFICATION: 当多个评审 agent 同时报告同一"数值矛盾/计算错误"时，先独立重算算术 + 检查语法歧义（冒号/分号把两条独立链拼接），再检查 agent 自己的重算是否有惯例错误（Dirac/Weyl 费米子 4/3 vs 2/3 系数、T_F=1/2 基本表示因子、Killing 度规归一化），最后才定性 P0。案例：V17 摘要 "5.00→5.47: 0.46%..." 被 5 agent 集体误读为算术矛盾，实际 0.46%×148≈0.68≈Ω_DE 是独立自洽链。合成报告必须附"agent 误判纠正"表。See `references/agent-false-positive-independent-verification.md`.
+
+- "10^N 数量级矛盾" / "差 10²⁴" / "单位转换漏算" / "漏了 ℏ/c/k_B 转换" / "固定点因子漏 1/2" / "论文正确但审稿人算错" — triggers UNIT-CONVERSION & PREFACTOR FALSE-POSITIVE: 当审稿人报告"差 10²⁴ 倍"或"固定点算错"时，先 grep 论文是否已显式写了单位转换句（ℏ=6.582×10⁻²⁵ GeV·s 等）并自行代入转换因子；固定点类先独立重算（β(g)=ηg/2 的 1/2 因子极易漏）；两审稿人对同一量给出互相矛盾的数值时，必有一方错，自行重推仲裁。另含跨论文推导度机器量化法（grep 两 Lean 文件 `^(theorem|lemma)` 名集合→交集=转录/follows、差集=新增/language_only、未转录=透明度缺口）。See `references/reviewer-unit-conversion-and-prefactor-false-positives.md`.
+
+- "正文已修正但Lean未同步" / "双向脱节" / "正文诚实化 vs Lean语义脱节" / "编译通过但数学错" / "硬算术错误" / "正文自报公式与Lean定义不一致" / "观测输入伪装成谱定理" / "迹配对不正定" — triggers BODY-VS-LEAN DESYNC + HARD ARITHMETIC FIX: 终审时对照正文自报公式与 Lean 实际定义（ouCov 指数、观测输入 vs 谱定理、正定性隐含假设），修复须双向同步（正文 + Lean 定义/注释）。三例硬算术错误（ouCov 因子2、metzler 比例 v/u→u/v、PF 公理伪装谱定理→targetRatio def）完整修复 recipe 见 `references/body-vs-lean-desync-and-hard-arithmetic-fixes.md`。
 
 ## 核心检测规则 (Core Detection Rules) — v1.1 新增
 
@@ -184,6 +226,16 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 **B5. 母框架诚实标注 vs 正文过度声称**
 - 若母框架已诚实标注"不闭合"，但论文正文仍称"闭合"，判 **P0 内部矛盾**。
 - 检查"已撤回"的声明（如 DM=GW）是否在正文残留（见 `references/triple-gw-v17-review-record.md`）。
+
+**B6. 诚实性 tells 细目（BootLoops prose-lint E，v1.3 新增）**
+- 规则组 B1–B5 聚焦公理/引用/校准层面的诚实性；B6 补**句子级/数字呈现级**的诚实性 tell。逐条 grep，命中即记录，不用眼扫。
+- **B6.1 捏造精确性**：编数字/计数/日期当数据。只用有真实来源的量；估计值显式标"估计"或删。宁可要更小但已核实的 claim，不要更大但臆测的。
+- **B6.2 重要性通胀**：声称某事"被需要"/"比实际更重要"。只声称真实——"at the frontier of what is computable"（可计算前沿），非"what the field needs"（领域所需）。
+- **B6.3 出处错误**：错标谁构建/撰写/发现。对照真实 repo/论文核验，不靠记忆。
+- **B6.4 结果过度声称**：把 partial/未验证结果 round up 成"done"。报告真实状态；绝不暗示通过了没通过的检查。
+- **B6.5 自信模糊**：把有争议/近似的事实（"a first"/记录/日期）平铺直叙。要么 pin 来源，要么精确 hedge，绝不模糊。
+- **B6.6 封闭区间/引号完整性**（最易漏）：(a) 认证区间**向外**舍入——下端点向下、上端点向上，认证下界只能向下舍；(b) 引号需逐字收据——fair paraphrase 加引号=出处错误；(c) error-bound/residual 摘要只能**保守方向**舍入（1.06×10⁻⁷ 的 agreement 不是"10⁻⁷"），逐条 trace 数量级摘要回源值并查舍入方向。
+- 详细 checklist 见 `references/prose-lint-honesty-number-discipline.md`。
 
 ---
 
@@ -299,7 +351,111 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 - "severity 分级" / "P0 阻断" / "严重度判定" / "分级标准" — triggers SEVERITY CLASSIFICATION (规则组 D): 按 P0–P3 标准判定，套用升级/降级规则。
 - "审查员算术假阳性" / "集体误读" / "约定错误" — triggers REVIEWER ARITHMETIC FALSE-POSITIVE VERIFICATION (规则组 E): 独立重算优先，摘要歧义检测，约定依赖值重算。
 
+- "正文诚实化 vs Lean 代码语义脱节" / "正文已修正但Lean未同步" / "编译通过但数学错" / "ouCov 因子2" / "paper-vs-lean semantic drift" — triggers PAPER-VS-LEAN SEMANTIC DRIFT: 终审核对不能只核对声明计数，还要核对正文公式语义 vs Lean 代码定义是否一致；正文已诚实化/修正但 Lean 代码未同步是最危险的脱节（编译 0 sorry 但数学错）。三个硬算术错误案例（ouCov 因子2、metzler 比例 u/v、PF 主特征值伪装谱定理）见 `references/paper-vs-lean-semantic-drift.md`。
+
 ---
+
+### 规则组 F：三 Refinement Agents 检查项（ScientistTwo Table 7）— v1.2 新增
+
+> Table 7 实证：三个 refinement agent（spec 合规 + 引用核查 + 方法-代码对齐）**全开**才 49/49 通过四项审计；关掉任意一个即出现引用幻觉（19/1840）或方法-代码错位（38/49）。
+> **F1/F2/F3 三项在每次审稿中默认全开，不得单独关闭**；若因工具限制跳过某项，必须在报告中标 `F_x: SKIPPED(reason)` 并降级 gate 结论。
+
+---
+
+#### F1 — Spec 合规审计（Anti-Reward-Hacking）
+
+**检查目标**：每条 finding 及其对应的论文 claim，是否满足论文**自己声明的规范/约束**，以及是否满足本次审稿任务声明的 rubric。
+
+**检测动作**
+1. 抽出论文中显式声明的规范集：`axioms / assumptions / 约束条件 / 不变量 / claimed scope(域、维数、能量区间) / rubric 条款`
+2. 对每条 finding 的 `claim_at_issue` 逐条对照，判定三类状态：
+   - `compliant`：claim 在声明范围内且被证据支撑
+   - `reward-hacking`：**表面合规但实质绕过**——典型形态：①悄悄加入未被声明的辅助假设；②把结论缩到无意义的退化情形来换取成立；③用「在适当条件下」等无限定词替代真实条件；④改符号/改定义使约束字面满足
+   - `violation`：claim 直接越过声明范围（如未声明适用范围却外推到整个参数空间）
+3. 命中 `reward-hacking` 或 `violation` → 记为 **P0/P1**，并写出「被绕过的那条规范」原文
+
+**输出字段**：`finding_id / declared_spec / status(compliant|reward-hacking|violation) / bypassed_spec_quote / severity`
+
+**假阳性防范**：作者**显式声明并证明**的额外假设不算 hacking；仅当假设被隐藏、或声明后未给依据时才算。
+
+---
+
+#### F2 — 引用核查（Live-Search 逐条验证）
+
+**检查目标**：升级现有 `bibliography-auditor`——**从「内部自洽核查」升级为「外部真实性核查」**。内部一致性（正文编号=文献表编号、引用格式统一）**不构成通过**。
+
+**检测动作**
+1. 提取**全部**参考文献条目（含正文中出现的所有 work）
+2. 对**每一条**执行 live web search（arXiv / DOI / 期刊页 / 出版社页 / Semantic Scholar）逐条核验四要素：
+   - 存在性（该文献真实存在）
+   - 元数据匹配：标题、全部作者（含顺序）、年份、venue、卷期页
+   - 标识符有效：DOI 可解析 / arXiv ID 指向该标题 / 否则说明来源
+   - 具体引用位置的可支持性：该文献是否真的支持正文中引它时的那句话（防「存在但被误用/张冠李戴」）
+3. 状态分级：
+   - `verified`：四要素全匹配
+   - `metadata-mismatch`：存在但标题/作者/年份/venue 有偏差 → **P0**（须修正或删除）
+   - `unsupported-citation`：文献存在但**不支持**所引论断 → **P0**
+   - `hallucinated`：live-search 查无此文献（或 ID 指向不同论文）→ **P0 + 一票否决**，禁止 PASS
+4. 每条核查必须附**可复现证据**：查询串、命中的原始 URL/DOI、抓取日期。无证据的 `verified` 视为未核查。
+
+**输出字段**：`ref_key / claimed_metadata / search_query / found_url_or_doi / status / severity / evidence_locations`
+
+**执行约束**：无网络或搜索受限时，**不得**默认标记 `verified`，一律标 `unverified` 并在 gate 报告中降级（引文审核未完成 ⇒ 不得给出 PASS）。
+
+---
+
+#### F3 — 方法-代码/形式化对齐审计
+
+**检查目标**：论文的方法描述必须与 **Lean / 代码 / 脚本实现** 逐条对齐。**禁止「论文声称 X 但代码里没有 X」**。
+
+**检测动作**
+1. 从论文 Methods / 形式化章节抽出**原子级主张清单**（每条 = 一个可判真假的实现陈述），例如：
+   - 「Z₂ 等变 K 理论替代 Atiyah-Bott」
+   - 「数值使用 4 阶 Runge-Kutta，步长 h=1e-3」
+   - 「该不变量在 D=2 情形退化为 Chern 数」
+2. 在 Lean/代码中**定位对应实现**，逐条给出：
+   - `aligned`：代码中有对应实现且语义一致（附 `文件:行号` 或定理名）
+   - `partial`：部分实现（如只在特例分支 / 只对某维度 / 被 `:=True` stub 或 `sorry` 占位）→ **P0/P1**，必须披露
+   - `missing`：论文声称但实现中**完全不存在** → **P0 一票否决**，禁止 PASS
+   - `extra`：实现中存在而论文未描述的关键机制（可能影响可复现性）→ **P2**，建议补写
+3. 检查**参数/常量一致性**：论文数值表 ↔ 代码默认参数（步长、截断维度、容差、随机种子）
+4. 检查**stub/占位披露完整性**：`sorry`、`:=True`、硬编码返回值、跳过分支必须在论文中显式披露（参照 Pitfall 5: `:=True` Stub Disclosure）
+
+**输出字段**：`claim_id / claim_quote / code_anchor(file:line|theorem) / status(aligned|partial|missing|extra) / severity / disclosure_needed`
+
+**执行约束**：无法访问实现文件时，标 `F3: BLOCKED(no_code_access)`，并在 gate 报告中标注「方法-代码对齐未验证」——不得凭论文自述推定 `aligned`。
+
+---
+
+#### 规则组 F 汇总输出（并入 Finding Output Format）
+
+```
+[F1] finding_id | status | bypassed_spec_quote | severity
+[F2] ref_key | status(verified|metadata-mismatch|unsupported|hallucinated) | evidence_url | severity
+[F3] claim_id | status(aligned|partial|missing|extra) | code_anchor | severity
+F-Table7 通过判定: 三项全开且无 P0 → PASS; 任一项 SKIPPED/BLOCKED 或存在 P0 → 不得 PASS
+```
+
+**与流程的接口**：F1/F2/F3 在 Stage 2a/4a 审稿阶段执行；其结果同时作为 `## Quality Gates` 一票否决项与 `## Rebuttal Agent 闭环协议` R1 任务卡的输入源。
+
+### 规则组 N：数字呈现一致性检测 (Number Discipline) — v1.3 新增
+
+> **来源**：BootLoops `prose-lint` N 段（13 条）。核心原则：**每个数字出现在多个表面（正文 / 表格 / 图注 / 图标签 / 摘要），每一对表面都是一个静默矛盾位点**。这些是机械类矛盾，sweep 它们，不信任眼睛。规则组 N 与规则组 C（跨章节一致）互补——C 抓"值变了没同步"，N 抓"值没变但呈现方式制造了矛盾"。
+
+- **N1 舍入方向**：测量到的数字/精度计数**绝不向上舍**——实测 23.85 位打印 23 非 24。achievement 数字永远朝更弱 claim 舍。
+- **N2 减法一致呈现**：读者会相减的数字必须一致舍入——41.2 和 3.9 支持"37 位 gap"；独立 floor 成 41、3 后打印算术为假（38）。分解和同理：舍入列必须重组出舍入总和。
+- **N3 每个 N/N 和 N-of-M 带单位**："812/812 exact"——是条目/列/行/成员？计数名词来自不同表面则错，直到对照源定义核对。
+- **N4 显示平局**：值正好落在舍入平局（141/400=0.3525）在 float 格式（35.2）与 half-up 显示（35.3）打印不同——生成标签与正文静默分歧。显示标签从整数计数用精确 half-up 十进制算术算，绝不从 float。
+- **N5 二代舍入**：已舍入值的比/差（0.172/0.126→1.37）≠ 未舍入计算（1.362）。逐字引源记录的数值；绝不"纠正"可引用记录。z-score/比"不能从显示输入重算"可能是从未舍入值精确算的——说明哪个约定算的。
+- **N6 分解不求和→命名边界**：打印的部分凑不齐打印的总和，通常是一次分析里两个不同边界（按日期切的窗口、按不同方案赋的标签），不是过期数字。找到边界错配并说明，不 nudges 数字逼和。
+- **N7 非嵌套分母**：两个过滤器可差一个 NET 计数（4201 kept vs 4178 kept，overlap 3900）："23 fewer"为真，"23 removed"为假。写任何子集从句前先查嵌套。
+- **N8 反直觉方向数字带机制从句**：正确数字朝"错"方向动（样本翻倍功率反降）读作 typo。核实后，在每个打印处附半句机制。
+- **N9 两个真数字一个假括号**：两个统计共享一个括号（"p=0.005；高于均值十五个标准差"）诱导读者合成两个都不支持的 claim。各自命名 provenance，或分开。
+- **N10 情态词是数字的一部分**："the estimate can be 1.08 times the bound" 压缩成 "is 1.08 times" 把可能性变判定。压缩/重述 claim 时查情态（can-be/is/must-be）与查数字同样仔细。
+- **N11 一符号一对象**：对易冲突字母做符号普查——同一字母一节作系数、一节作曲/矩阵/半径会误导追踪它的读者（同论点两义最糟）。改名较廉价实例并 sweep。词同理：同一术语技术义+普通义同段出现→首次出现 gloss 或改名。
+- **N12 claim-bearing 连接散文**：关系从句静默附加可核查事实（"their best-fit model carries 的趋势"）——一致性 pass 必须覆盖数字周围的连接散文，不只数字本身。
+- **N13 标识符完整性双向**：看似正确的标识符可能错、看似错的可能对——注册机构迁移前缀，带陌生前缀的 DOI 可能是真的、"canonical" 形式反而不再解析。归一化到熟悉形式前必须 resolve 两个候选；奇数者获胜时留 dated do-not-fix 注释。裸整数出现在该引用的位置可能是 citation-command misfire（numeric-style \citealp 输出"(cf. 9)"）——查书目渲染后再怀疑手打数字。
+- 完整 13 条 checklist 见 `references/prose-lint-honesty-number-discipline.md`。
 
 ## 输出格式 (Finding Output Format) — v1.1 新增
 
@@ -454,6 +610,79 @@ Batch 1 (parallel, 3 agents):
 - [ ] Bypass AWA findings → proceed directly
 ```
 
+## Rebuttal Agent 闭环协议 — v1.2 新增
+
+> 来源：ScientistTwo (arXiv:2609.19644) §3.5 Rebuttal Agent。把用户此前**隐式**做法（V38→V64 每轮审稿驱动证明升级，如「Z₂ 等变 K 理论替代 Atiyah-Bott」）固化为命名流程 + 阈值门控。
+> **核心纪律：Rebuttal 不是改文字，是针对审稿意见生成新证据。**
+
+### 触发条件
+
+| 条件 | 动作 |
+|:--|:--|
+| 综合分 **≥ 8/10** | 不触发，直接进 Quality Gates 投递判定 |
+| 综合分 **6–8/10** | **触发本闭环**，`max_rounds=2` |
+| 综合分 **< 6/10** | 不走本闭环，走 idea-level 深度重建（见 `## Quality Gates`） |
+| 存在未消解的 **P0**（如引用幻觉、方法-代码错位、算术假阳性未过验证） | 无论分数高低，**强制触发**第 1 轮 |
+
+**范围限定（与 text-level 分流对齐）**：本闭环只处理 **idea-level** 意见（需要新证明 / 新数值验证 / 新图 / 新附录 才能回应）。纯 text-level 意见（排版、措辞、符号统一、DOCX 结构）不进 Rebuttal Coder，直接走 Stage 4a 修订路径。混淆二者是本协议最常见的误用。
+
+### 三阶段流程（每个 round）
+
+**阶段 R1 — Rebuttal Planner（意见 → 任务）**
+- 输入：上一轮完整审稿报告的全部 finding（P0–P3）
+- 对**每条 idea-level finding** 产出一个可执行的「补充分析/实验任务」，而非一段辩解文字
+- 任务卡必须含字段：`finding_id` / `severity(P0–P3)` / `claim_at_issue`(论文原句) / `required_evidence` / `acceptance_test`(怎样算被回应) / `level(text|idea)`
+- 映射约定：理论物理论文的「补充实验」= **新生成一段 Lean 证明 / 数值验证 / 新图 / 新附录**；不得以「已在下文说明」式文字敷衍
+- 任务清单需按 severity 排序，P0 任务全部为**阻塞项**，未完成不得进入 R3
+
+**阶段 R2 — Rebuttal Coder（执行任务）**
+- 逐条执行 R1 任务卡，产出**可核查的产物**：Lean 文件/定理片段、数值脚本与输出、新图源文件、新附录 Markdown
+- 每个产物必须带可复现信息：命令、输入、输出摘要（哈希或数值）
+- 若某任务执行后发现 claim 本身不成立 → **不伪造证据**，标记 `unresolvable` 并升级为 idea-level 重建候选（进 R4 回退保护判定），绝不用「软化措辞」替代
+- 禁止 reward-hacking：不得通过缩小 claim 范围、加限定词、改符号定义的方式让 `acceptance_test` 表面通过（对照规则组 B 诚实性检测、规则组 F1）
+
+**阶段 R3 — Paper Enhancer（回填正文）**
+- 把 R2 产物**回填进论文正文**：改 narrative claims、更新表格/图/附录编号、同步摘要与结论中的数值
+- 回填后必须重跑**跨章节一致性检测（规则组 C）**：新证据引入的数值/符号/术语需全文一致
+- 更新 `Diff Log`：每个改动条目记录 `{finding_id, 原句, 新句, 证据位置}`
+
+**阶段 R4 — 全量重审（强制，每 round 结束必做）**
+- **必须重跑完整 12-stage 审稿 pipeline，不得只验局部修复**
+- 理由：局部验证会漏掉跨章节一致性与引用连带影响（Pitfall 12/13/15 的直接教训）
+- 输出：新一轮综合分 + 完整 finding 列表（旧 finding 复现状态 + 新 finding）
+- 判定：分数 ≥ 8/10 → 退出闭环；否则 `round += 1`，若 `round > max_rounds(=2)` → 退出并转 idea-level 重建判定
+
+### 闭环调度表
+
+| Round | 增幅期望（Table 5 实证） | 退出条件 |
+|:--|:--|:--|
+| 0（无答辩） | 基线 5.2/10，接收率 46.9% | — |
+| 1 | **6.9/10，79.6%（增幅最大）** | ≥8/10 或 P0 全清且无 idea-level 阻塞项 |
+| 2 | 7.6/10，93.9%（**边际递减**） | ≥8/10；否则停止，转 idea-level |
+
+**`max_rounds=2` 是经验最优**：1 轮吃掉主要增益，第 2 轮边际收益显著下降；继续加轮次只增加成本与「为改而改」风险。若用户显式要求第 3 轮，需在报告中标注 `[超出经验最优轮次]` 并说明理由。
+
+### 回退保护（Rollback Guard，强制）
+
+idea-level 重建（含 `unresolvable` 升级项与 <6/10 判定项）必须遵守**严格更优才替换**：
+
+1. **先快照**：重建前记录当前最优版本的 `版本号 + 文件哈希 + 该版本综合分`（写作 `best_known`）
+2. **重建**：在**独立分支/副本**上做深度重建（回到假设层，改公理/框架，而非补丁）
+3. **A/B 全量审稿**：对重建版跑完整 pipeline（同一批 agent、同一 rubric），得到新综合分
+4. **判定**：
+   - 新分 **严格 >** `best_known` 分 → 接受替换，更新 `best_known`
+   - 新分 **≤** `best_known` 分 → **丢弃重建版，回退到 `best_known`**（回退过程需可一键复现：从快照哈希还原）
+5. **记录**：无论接受或回退，都在报告 `Patterns` 段落写明 `{重建假设, 新分, 旧分, 决策}`；回退不得静默发生
+
+禁止：以「新版看起来更完整」为由跳过 A/B 计分；禁止在回退后继续保留重建版的局部片段（避免半成品污染）。
+
+### 与既有章节的接口
+
+- **规则组 D（Severity）**：每条 finding 增补 `level: text|idea` 列；只有 `idea` 进 R1
+- **规则组 E（算术假阳性验证）**：Rebuttal Coder 产出的任何新数值，必须过规则组 E 后方可回填
+- **规则组 F（三 refinement agents）**：R3 回填后、R4 重审前，先跑 F1/F2/F3 自检
+- **Quality Gates**：本协议的退出分即 Quality Gates 的输入分，二者共用同一评分口径
+
 ## Quality Gates
 
 | Gate | Tool | Blocking? |
@@ -464,6 +693,36 @@ Batch 1 (parallel, 3 agents):
 | Stage 4a AWA findings | AWA reviewers | **Advisory** — user decides |
 | Stage 4.5 Final Integrity | ARS integrity_verification_agent | **MANDATORY** — zero issues |
 
+### 数值接受门槛 (Numerical Acceptance Gates) — v1.2 新增
+
+> v1.2 追加：把 ScientistTwo Table 5 的分数门槛落为**显式数值 gate**，取代 v1.1 的定性描述。所有 gate 的判定输入 = 最近一次**全量审稿**（12-stage pipeline）的综合分，禁止用局部验证分或自评分替代。
+
+### 门槛与动作（唯一权威表）
+
+| 综合分 | 判定 | 强制动作 | 下一步入口 |
+|:--|:--|:--|:--|
+| **≥ 8/10** | **PASS — 可投** | 结清报告：`Synthesis Report` + `Patterns` + `Recommended Actions`；确认无未消解 P0 | 投递 / 用户终审（可选 held-out 终审：Ollama qwq:32b 或独立 rubric） |
+| **6 – 8/10** | **REVISE — 走 Rebuttal 闭环** | 进入 `## Rebuttal Agent 闭环协议`，`max_rounds=2`；先出 R1 任务卡清单再动手 | 闭环退出后重跑本 gate |
+| **< 6/10** | **REJECT — 走 idea-level 深度重建** | 停止文字层修补；回到假设层重建（改公理/框架/证明策略），并启用 Reback 回退保护 | 重建版跑全量审稿 → 与 `best_known` A/B 比 → 严格更优才替换 |
+
+### 一票否决项（与分数无关，任一存在即不得 PASS）
+
+| 否决项 | 依据 | 处理 |
+|:--|:--|:--|
+| 引用幻觉（参考文献经 live-search 不存在 / 元数据不符） | 规则组 F2 | 强制进 Rebuttal 闭环，P0 阻塞 |
+| 方法-代码错位（论文声称 X、Lean/代码无 X） | 规则组 F3 | 同上；若无法补实现 → 改 claim，改后重跑全量审稿 |
+| 未过规则组 E 的算术/数值结论 | 规则组 E | 剔除或改写该 claim 后重审 |
+| 存在被静默忽略的 P0 finding | Pitfall 11/12/13/15 | 补齐回应后重审 |
+
+### Gate 执行纪律
+
+1. **分数口径统一**：gate 分数与 Rebuttal 闭环退出分必须来自**同一次全量审稿**；不得混用不同轮次的分段结果
+2. **不可用「接近过线」通融**：7.9 与 8.0 走不同路径，不做四舍五入上调
+3. **每次 gate 判定留痕**：`{轮次, 综合分, 各 P0–P3 计数, gate 判定, 触发的动作}`
+4. **版本新鲜度前置检查**：跑 gate 前先确认 agent 读到的文件版本 = 用户指定版本（Pitfall 15 / Pitfall 13），陈旧文件导致的分偏差不作数
+5. **超轮次例外**：`max_rounds=2` 用尽仍落在 6–8 → 按 <6 处理（转 idea-level），不再加轮次
+6. **高风险单一模型偏差**：若综合分仅由 v4-pro/v4-flash 单模型给出且落在 7–8 边界区间，建议补一道 held-out 终审再定 PASS/REVISE（历史上存在「v4-pro 单独审计 9/10 实际 2/10」的失准记录）
+
 ## Innovation-Correctness Gap Analysis (NEW v1.1)
 
 When a paper shows divergent innovation and correctness scores (e.g., innovation 5.2 vs correctness 3.4), run a **meta-review** asking: "What correctness improvements would most elevate this innovation?" The gap reveals that the conceptual framework is strong but the mathematical execution lags. See `references/innovation-correctness-gap-analysis.md` for the 5-specialist meta-review protocol (proof gaps, D1 closure, gamma closure, axiom burden, improvement roadmap).
@@ -473,6 +732,8 @@ When a paper shows divergent innovation and correctness scores (e.g., innovation
 Making a paper MORE honest can REDUCE scores. This is NOT a regression — it reflects accurate assessment replacing inflated overclaim scores. See `proof-paper-cross-ref-revision/references/progressive-honesty-score-paradox.md`.
 
 ## Reference Files (NEW in v1.1)
+### ScientistTwo (arXiv:2609.19644) → 可移植机制 ← NEWEST
+ScientistTwo 论文的四个可移植机制（Rebuttal 闭环 / CoE 四维审计 / Meta-Review 分流 / held-out 评审器）+ Table 5/7 实证数据 + P0-P4 整合优先级。见 `references/scientisttwo-review-mechanisms.md`。
 
 | `references/reference-list-verification.md` | **⭐ NEW — 参考文献核验脚本模式** — phantom/orphan 检测 + `[1--5]` 双横线范围引用展开 + 数学区间 `[10,100]` 误报排除。投稿前必查（2026-09-19） |
 
@@ -499,10 +760,6 @@ Making a paper MORE honest can REDUCE scores. This is NOT a regression — it re
 | `references/v14-to-v16-iterative-fix-pipeline.md` | **⭐ NEW — V14→V15→V16 三版迭代修复** — regression引入检测、header-code漂移、尺度不匹配、双轨同步协议 (2026-08-06) |
 | `references/cross-paper-consistency-review-protocol.md` | **⭐ NEW — 跨论文一致性审查协议** — V63 vs V16对比审查、六步对齐方法、4项关键陷阱 (2026-08-06) |
 | `references/iterative-fix-regression-detection.md` | **⭐ NEW — 迭代修复回归检测** — 4类回归模式：Bourgain头注释陷阱、Stale定理旧值、观测比较漂移、尺度不匹配 (2026-08-06) |
-| `references/v4pro-multi-paper-cross-review.md` | **⭐ NEW — v4-pro Multi-Paper Cross-Review** — 6-step protocol for 3+ paper cross-review with v4-pro: extraction→prompt build (<50K chars)→v4-pro API (max_tokens=32768)→8-axis matrix→5-section output. ~160s. (2026-08-07) |
-| `references/axiom-consistency-audit-patterns.md` | **⭐ NEW — 公理体系自洽性审计** — 8 模式：可证 False(爆炸原理)/矛盾迁移/表演性诚实(@[honest_axiom]注释文本)/公理计数失守/公理重述当证明/非紧空间离散谱错误/流形标量占位/声称verified但定理不存在 + Lean最小文件编译复现矛盾技术 (2026-08-16) |
-| `references/multi-paper-v4flash-thinking-review.md` | **⭐ NEW — Multi-paper V4-Flash Thinking Review** — Single-API-call alternative for 3+ paper cross-review. ~4 min, 48K reasoning. (2026-08-06) |
-| `references/cross-paper-gw-consistency-audit.md` | **⭐ NEW — 跨论文GW一致性审计** — 两篇SL(6,C)论文GW谱交叉审查，频率/机制/H₀诚实度8维比对 (2026-08-06) |
 | `references/bourgain-header-claim-trap.md` | **⭐ NEW — Bourgain头注释陷阱** — 头声称已修但代码未删的检测模式 (2026-08-06) |
 | `references/v14-review-fix-pipeline.md` | V14 Review-to-Fix Pipeline — Lean审计→双轨修复→交叉核查 (2026-08-06) |
 | `references/lean-axiom-consistency-audit.md` | **⭐ NEW — Lean 公理自洽性审计** — 编译 `False` 证明来验证公理不一致、表演性诚实（注释掉的 @[honest_axiom]）、矛盾迁移（"修"引入新矛盾）、公理计数矛盾、幽灵定理声称（"fully verified" 但 .lean 无此定理）。CGICE V9.1 案例：3 agent 审出"可证 False"的致命缺陷 (2026-08-16) |
@@ -525,7 +782,6 @@ Making a paper MORE honest can REDUCE scores. This is NOT a regression — it re
 | `references/paper-plus-lean-final-review.md` | **NEW** — Paper+Lean 6-agent final review: parallel deploy of consistency+logic+technical+writing+bibliography+lean-specialist. Multi-dimensional scoring, Deng-Hani framework compliance, prioritized P0-P3 fix checklist (2026-07-30) |
 | `references/revision-landing-check-pattern.md` | **NEW** — Revision landing check: automated scan against prior review P0-P3 checklist, fix/partial/unfixed/new-issue classification, Lean stats conflict detection, residual version artifact scan (2026-07-30) |
 | `references/v63-p0fix-final-review-pattern.md` | **NEW** — V63 P0Fix two-stage review: 26-check audit → 5-agent panel (2026-08-04) |
-| `references/revision-landing-check-pattern.md` | Revision landing check: automated scan against prior review P0-P3 checklist (2026-07-30) |, fix/partial/unfixed/new-issue classification, Lean stats conflict detection, residual version artifact scan (2026-07-30) |
 
 ### V22→V25 Neutrino Condensation Paper (2026-07-06)
 
@@ -716,15 +972,7 @@ Ninth verified run — evaluating whether a reviewer MD improves specific paper 
 4. **Watch for stale statistics in reviewer MDs**: the 20260717 MD cited Lean stats from two versions back (54/82 axioms vs actual V52 9 axioms). Always verify reviewer-quoted file stats against current files before accepting their framing.
 5. **Author self-flagged caveats go into the adversarial context** ("已知作者自警" item) — a subsequent 5-agent review then independently confirms or dismisses them, giving the caveat a verdict instead of leaving it hanging (the ρ∈F flag was confirmed fatal by 2/5 agents).
 
-### Pitfall 8: Paper Extraction Overwrite — Wrong File Fed to Reviewers (2026-07-22)
 
-When extracting DOCX text for hybrid review, loop-based file matching can silently
-overwrite the full paper with a section-only fragment. **Symptom**: all 5 reviewers
-report "missing chapters" despite the full paper existing. **Detection**: compare
-`wc -c /tmp/paper.txt` against expected DOCX size. **Fix**: use exact filename
-matching, not pattern-based loops. Full protocol: `references/hybrid-review-extraction-overwrite.md`.
-
-### Pitfall: Interrupted delegate_task May Have Completed (Pitfall 6, 2026-07-15)
 
 ### Pitfall 7: Bibliography-Auditor 优化 (2026-07-16)
 
@@ -742,15 +990,6 @@ assert len(paper_text) > 5000, f"DOCX may be corrupted: only {len(paper_text)} c
 
 **Prevention**: Prefer python-docx paragraph-level edits over raw XML manipulation.
 
-### Pitfall 8: DOCX Extraction Loop Overwrites Paper File (2026-07-22)
-
-When a script loops over multiple DOCX files matching a version pattern and writes ALL to the SAME output path (`/tmp/v55_paper.txt`), the LAST (shorter) file overwrites the full paper. **Symptom**: Reviewers report "paper only contains §2.2 fragment". **Fix**: Break after FIRST match of the main paper pattern, or use unique output names per file. Verify output size > 100KB before deploying review.
-
-When extracting DOCX text for hybrid review, loop-based file matching can silently
-overwrite the full paper with a section-only fragment. **Symptom**: all 5 reviewers
-report "missing chapters" despite the full paper existing. **Detection**: compare
-`wc -c /tmp/paper.txt` against expected DOCX size. **Fix**: use exact filename
-matching, not pattern-based loops. Full protocol: `references/hybrid-review-extraction-overwrite.md`.
 
 ### Pitfall: Interrupted delegate_task May Have Completed (Pitfall 6, 2026-07-15)
 
@@ -823,13 +1062,11 @@ Eighth verified run — V51 paper, 155K chars, 474 paragraphs. 5 agents in 2 bat
 - Phase 2b: Bibliography rebuild (8 new refs [42]-[49], 3 removals, 1 journal fix)
 - Phase 3: Python cross-audit verifying all fixes consistent across 4 DOCX + 1 Lean
 
-Key lesson: **NTFS DOCX write corruption** — writing ZIP files directly to `~/...` produces `BadZipFile`. Always write to `/tmp/` first, then copy back. See `proof-paper-cross-ref-revision/references/v51-p0-rapid-fix-pipeline.md`.
+Key lesson: **NTFS DOCX write corruption** — writing ZIP files directly to `/mnt/c/...` produces `BadZipFile`. Always write to `/tmp/` first, then copy back. See `proof-paper-cross-ref-revision/references/v51-p0-rapid-fix-pipeline.md`.
 
 ### V50 Neutrino Condensation Paper (2026-07-13)
 
 Fifth verified run — V50 paper, 160K chars. 5 agents + Lean specialist. 3.6/10 — REJECT. Top findings: λ_KLS formula self-created, KO⁻³⁵(pt)=0, tautological verification, 17 :=True stubs. Full: `references/v50-neutrino-review-20260713.md`.
-
-### V20a Neutrino Condensation Paper (2026-07-05)
 
 ## Pitfalls
 
@@ -854,26 +1091,6 @@ When `detailed_comments` contains quoted phrases (e.g., `the "derived" value`), 
 
 When paper text contains LaTeX math with curly braces (`\mathbb{C}`, `\{X\}`), using `str.format()` to inject paper text into a prompt template breaks with `KeyError`. **Fix**: Use `str.replace("__TOKEN__", value)` instead of `.format()`. Never use `.format()` with untrusted paper text.
 
-### Pitfall 12: Version-Scope Discipline — Review the Requested Version, Not Its Transition (P0, 2026-08-06)
-
-When the user says "review V14", review V14 **as-is**. Do NOT:
-- Compare V14 against V15 fixes or analyze whether V15 changes landed
-- Critique the V14→V15 transition pipeline
-- Spend paragraphs proving that "V15 fixes weren't applied"
-
-If the file has a V15 header but is named V14, just note the naming oddity in one sentence and move on. The user wants a review of the **content**, not a meta-analysis of the version history. The correction signal is clear: "没有让审阅V15啊" — the user named the version they want. Stick to it.
-
-### Pitfall 13: Check Version Staleness Before Offering Fixes (P0, 2026-08-06)
-
-When the user mentions a version number but the pipeline has already progressed further (e.g., "V14" when V16 exists), do NOT offer to fix the old version. Check what the latest version is in the directory first. Signal: "嗯不需要了，现在都V16版本了".
-
-### 1. DeepSeek JSON Unparseable — detailed_comments with Embedded Quotes (P0)
-
-When `detailed_comments` contains quoted phrases (e.g., `the "derived" value`), the generated JSON is unparseable by `json.loads()`. Two of six reviewers in the V56 session produced valid JSON that failed parsing. **Recovery**: Use regex field extraction (`re.search(r'"score":\s*([\d.]+)', text)`) instead of `json.loads()`. **Prevention**: Add to prompt: "Escape ALL double-quotes in detailed_comments as backslash-escaped."
-
-### 2. Python .format() Brace Conflict with Paper Text (P0)
-
-When paper text or Lean stats contain curly braces (LaTeX math like `\mathbb{C}`, JSON templates in the prompt), using `str.format()` to inject content fails with `KeyError`. Observed twice in V56 review script builds. **Fix**: Use `str.replace("__TOKEN__", value)` instead of `.format()`. Never use `.format()` with untrusted paper text or Lean code.
 
 ### Pitfall 19: "P0 Fix Header Notes" — AI Rewrites Add Disclaimers Instead of Changing Text (2026-08-11)
 
@@ -902,9 +1119,6 @@ current file says "A5 deleted"). Detection: agent's reported line counts ≠ cur
 Fix: re-copy the current files + verify line counts + tell each agent the expected count before
 deploying. Full recipe: `references/stale-file-version-mismatch.md`.
 
-### Pitfall 15: Stale /tmp File in Re-Review (P0, 2026-08-23)
-
-When re-reviewing a **modified** file via delegate_task, agents may read a stale `/tmp` copy (copied during an earlier step like translation extraction) instead of the current version — producing findings that contradict the actual file (e.g. "A5 not deleted" when it was, "axiom=73" when current is 72). **Detection**: agent line counts don't match current, or the agent reports a nonexistent `_rev.txt` path. **Fix**: before deploying review agents on a modified file, re-copy the current version to the EXACT path referenced in the agent prompt and verify line counts. Full detail + detection script: `references/stale-file-re-review-pitfall.md`.
 
 ### Pitfall 14: v4-pro 全尺寸挂死 + v4-flash Content 空 (2026-08-07)
 
