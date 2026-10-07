@@ -107,7 +107,7 @@ reasoning = getattr(choice.message, 'reasoning_content', '') or ''
 content = choice.message.content or ''
 
 with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
-    f.write(f"# Multi-Paper Review — V4-Flash Thinking\n")
+    f.write(f"# Multi-Paper Review — V4-Flash <user>ing\n")
     f.write(f"Reasoning: {len(reasoning)} chars | Content: {len(content)} chars\n---\n")
     f.write(content)
 

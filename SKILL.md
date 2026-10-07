@@ -6,9 +6,16 @@ description: >-
   at writing and revision stages. ARS provides structural pipeline management, integrity
   verification, and formal peer review. AWA injects 12-specialist-agent parallel review
   at Stage 2 (Writing) and Stage 4 (Revision) for fine-grained quality improvement.
-  Triggers: hybrid review, ARS+AWA pipeline, integrated paper review, full review pipeline.
-version: "1.3.0"
+  Triggers: hybrid review, ARS+AWA pipeline, integrated paper review, full review pipeline,
+  manuscript version comparison (compare two drafts of the same paper for physical self-consistency).
+version: "1.4.0"
 model: deepseek-flash
+refs:
+  - references/version-comparison-self-consistency.md
+  - references/reviewer-calibration-audit.md
+  - references/negative-result-vs-derivation-self-contradiction.md
+  - references/definitional-restatement-self-contradiction.md
+  - references/re-review-score-drop-unverified-rigor.md
 tags: [academic-writing, peer-review, pipeline, multi-agent, hybrid, frame-audit, prose-lint, bootloops]
 depends_on:
   - academic-pipeline
@@ -107,6 +114,12 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 
 - "复审" / "re-review" / "带前轮P0清单复审" / "对抗性对照复审" / "逐条判定fixed/remain/partial" — triggers RE-REVIEW WITH ADVERSARIAL DEFECT-LIST INJECTION: 串行 5 代理直调 `deepseek-flash`（thinking=disabled）复审修订稿，前轮 P0–P3 清单作为对抗性上下文，要求每缺陷输出 fixed/remain/partial 判定，汇总为 已修复/未修复/部分修复 + 本轮新发现。完整执行配方（模型名、JSON 契约、~16-20s/代理串行、聚合规则、Lean 注释剥离计数）见 `references/rereview-adversarial-defect-list-execution.md`。
 
+- "再次给出修改建议" / "具体修改文本" / "投稿策略终审" / "第二轮复审" / "摘要词数假阳性" / "ground-truth 注入" — triggers SECOND-ROUND FOCUSED REWRITE REVIEW: 第一轮已确认缺陷清单、论文未改动时，第二轮复审不要重跑同样 prompt（会得到几乎一样的结果），应改为「聚焦改写 + 投稿策略」——①注入实测 ground truth（摘要词数去 LaTeX 公式、编译 EXIT_CODE、Lean 计数）抑制 reviewer 假阳性 ②要求每个 P0/P1 输出 paste-ready 英文改写文本（rewrite_text 字段）③每项判 BLOCKING vs ACCEPTABLE-AS-IS ④六维评分 originality/correctness/significance/clarity/formalization_rigor/honesty + mean ⑤投稿排名 PRD/SciPost/Found.Phys./JMP/CQG + first_choice。**摘要词数假阳性**：审稿 agent 会把 LaTeX 公式符号也算进摘要词数（报 290/330 超限 vs 实测 205），评审前必须自己实测并注入。完整配方见 `references/rereview-round2-focused-rewrite-and-ground-truth.md`。
+
+- "前轮声称已修复但文件没改" / "报告声称修复 vs 论文文件未改" / "复审发现前轮修复未落地" / "claimed-fix vs actual-file" / "前轮修复状态表可信吗" — triggers CLAIMED-FIX VS ACTUAL-FILE VERIFICATION: 复审前必须先 grep 论文文件独立验证前轮声称的每项修复是否真正落地（标题/计数/作者名/措辞/编号），不能信任前轮报告的"修复状态表"——前轮报告可能是在"假想修复"基础上写的，文件实际只改了头部注释、正文一字未动（LightSpeed 案例：报告称 6/6 P0 修复，实际 3 处 22 theorems + G. Coleman + 标题 + 编号全残留，复审 5 代理一致判 REMAIN）。见 `references/review-claimed-fix-vs-actual-file.md`。
+
+- "前轮报告声称已修复但文件未改" / "报告声称修复 vs 实际未改" / "复审前验证修复是否落地" / "定理编号对齐 Lean" / "正文叙述顺序 vs Lean 声明顺序" — triggers REREVIEW VERIFY PRIOR FIXES LANDED: 复审前必须先 grep 验证前轮缺陷是否真的在论文文件里被修复（计数词/人名/标题/措辞残留），**不能信任前轮终审报告的「已修复/已收敛」声明**——会出「整份报告声称 6/6 P0 修复完成，但论文文件一字未动、只有头部注释加了声明」的脱节。另含定理编号对齐 Lean 声明顺序的三处同步法（定义处 + 交叉引用 + 清单表）+ 复审脚本三坑（ROLE_PROMPTS 英文双引号冲突 / WSL HOME 空 / 公式替换 \n 陷阱）。见 `references/rereview-verify-prior-fixes-landed.md`。
+
 - \"评分收敛\" / \"P2/P3 无限递归\" / \"复审何时收尾\" / \"四轮复审轨迹\" — triggers REVIEW SCORE CONVERGENCE: 多轮复审的评分轨迹（6.2→7.1→7.3→7.5）、P0/P1 清零后 P2/P3 每轮重新出现的无限递归现象，以及收尾判据（评分跨越接受线 + P0/P1 连续清零 + 核心卖点稳固 + 五维度均衡 → 建议收尾而非无限修表述层）。见 `references/review-score-convergence-and-p2p3-infinite-recursion.md`。
 
 - "P2/P3无限循环" / "复审收敛" / "评分稳定但每轮都有新P2/P3" / "要不要继续修表述层" — triggers REVIEW-CONVERGENCE-STOPPING RULE: 当 P0/P1 连续两轮清零 + 评分稳定跨越接受线（~7.0，Foundations of Physics）+ 核心卖点（0 公理/0 sorry/真编译/#print axioms 黄金门控）多轮审查从未被击穿时，剩余的 P2/P3 是**表述/文献精化的无限递归**——每轮审稿人都能挑出新瑕疵（[N] 缺作者年份、NuFit 版本号、摘要边界句措辞、E_{6w} 定义、表格分隔符），评分提升递减（7.3→7.5 仅 +0.2），且 P3 数量会从 11 膨胀到 31。此时应**主动建议收尾**（生成交付版 + 更新 memory），而非继续"修 P2/P3 → 再审 → 又发现新 P2/P3"的死循环。判据：P0/P1=0 且 `#print axioms` 干净且核心推导链未被击穿 → 收尾。V64 四轮实测：6.2→7.1→7.3→7.5，第 4 轮五维度全 7.5 且 bibliography 从 6.5 跃升 7.5，之后停止。
@@ -150,6 +163,8 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 - "10^N 数量级矛盾" / "差 10²⁴" / "单位转换漏算" / "漏了 ℏ/c/k_B 转换" / "固定点因子漏 1/2" / "论文正确但审稿人算错" — triggers UNIT-CONVERSION & PREFACTOR FALSE-POSITIVE: 当审稿人报告"差 10²⁴ 倍"或"固定点算错"时，先 grep 论文是否已显式写了单位转换句（ℏ=6.582×10⁻²⁵ GeV·s 等）并自行代入转换因子；固定点类先独立重算（β(g)=ηg/2 的 1/2 因子极易漏）；两审稿人对同一量给出互相矛盾的数值时，必有一方错，自行重推仲裁。另含跨论文推导度机器量化法（grep 两 Lean 文件 `^(theorem|lemma)` 名集合→交集=转录/follows、差集=新增/language_only、未转录=透明度缺口）。See `references/reviewer-unit-conversion-and-prefactor-false-positives.md`.
 
 - "正文已修正但Lean未同步" / "双向脱节" / "正文诚实化 vs Lean语义脱节" / "编译通过但数学错" / "硬算术错误" / "正文自报公式与Lean定义不一致" / "观测输入伪装成谱定理" / "迹配对不正定" — triggers BODY-VS-LEAN DESYNC + HARD ARITHMETIC FIX: 终审时对照正文自报公式与 Lean 实际定义（ouCov 指数、观测输入 vs 谱定理、正定性隐含假设），修复须双向同步（正文 + Lean 定义/注释）。三例硬算术错误（ouCov 因子2、metzler 比例 v/u→u/v、PF 公理伪装谱定理→targetRatio def）完整修复 recipe 见 `references/body-vs-lean-desync-and-hard-arithmetic-fixes.md`。
+
+- "摘要超250词" / "摘要超限" / "abstract exceeds word limit" / "overclaim 修复导致摘要膨胀" / "定理改名后 SHA 失效" / "给具体改写文本而非泛泛建议" — triggers OVERCLAIM-REWRITE SIDE-EFFECTS: 摘要字数先实测（去 LaTeX 公式后数英文词，reviewer 会把公式符号计入致假阳性 290/330 vs 实测 205）；overclaim 修复措辞（加 conditional/motivated/supplied 限定词）会加词致摘要膨胀（205→270，需压缩回 ≤240）；Lean 定理改名改变源文件 hash，论文 B.1 的 SHA-256 必须重算；第二轮评审必须让 reviewer 给「可直接粘贴的英文改写文本」（JSON rewrite_text 字段）而非「应缩短摘要」泛泛建议。See `references/overclaim-rewrite-side-effects.md`.
 
 ## 核心检测规则 (Core Detection Rules) — v1.1 新增
 
@@ -754,7 +769,7 @@ ScientistTwo 论文的四个可移植机制（Rebuttal 闭环 / CoE 四维审计
 | `references/false-proposition-axiom-detection.md` | **⭐ NEW — 假公理三型检测** — 假命题公理(∀量化写错可证False)/假实数等式公理(exp精确值不等,norm_num盲区)/零内容公理(1=1命名成定理)。CGICE V9.1 终审 2026-08-19 |
 | `references/v4pro-multi-paper-cross-review.md` | **⭐ NEW — v4-pro Multi-Paper Cross-Review** — 6-step protocol for 3+ paper cross-review with v4-pro: extraction→prompt build (<50K chars)→v4-pro API (max_tokens=32768)→8-axis matrix→5-section output. ~160s. (2026-08-07) |
 | `references/axiom-consistency-audit-patterns.md` | **⭐ NEW — 公理体系自洽性审计** — 8 模式：可证 False(爆炸原理)/矛盾迁移/表演性诚实(@[honest_axiom]注释文本)/公理计数失守/公理重述当证明/非紧空间离散谱错误/流形标量占位/声称verified但定理不存在 + Lean最小文件编译复现矛盾技术 (2026-08-16) |
-| `references/multi-paper-v4flash-thinking-review.md` | **⭐ NEW — Multi-paper V4-Flash Thinking Review** — Single-API-call alternative for 3+ paper cross-review. ~4 min, 48K reasoning. (2026-08-06) |
+| `references/multi-paper-v4flash-thinking-review.md` | **⭐ NEW — Multi-paper V4-Flash <user>ing Review** — Single-API-call alternative for 3+ paper cross-review. ~4 min, 48K reasoning. (2026-08-06) |
 | `references/cross-paper-gw-consistency-audit.md` | **⭐ NEW — Cross-paper GW consistency audit** — 8-axis checklist for SL(6,C) trilogy, 3 common failure patterns, V63→V17 case study (2026-08-06) |
 | `references/section-alignment-v4pro-docx.md` | **⭐ NEW — Section realignment workflow** — v4-pro rewrite + DOCX insertion for diverged papers, pitfall catalog (2026-08-06) |
 | `references/v14-to-v16-iterative-fix-pipeline.md` | **⭐ NEW — V14→V15→V16 三版迭代修复** — regression引入检测、header-code漂移、尺度不匹配、双轨同步协议 (2026-08-06) |
@@ -1062,7 +1077,7 @@ Eighth verified run — V51 paper, 155K chars, 474 paragraphs. 5 agents in 2 bat
 - Phase 2b: Bibliography rebuild (8 new refs [42]-[49], 3 removals, 1 journal fix)
 - Phase 3: Python cross-audit verifying all fixes consistent across 4 DOCX + 1 Lean
 
-Key lesson: **NTFS DOCX write corruption** — writing ZIP files directly to `/mnt/c/...` produces `BadZipFile`. Always write to `/tmp/` first, then copy back. See `proof-paper-cross-ref-revision/references/v51-p0-rapid-fix-pipeline.md`.
+Key lesson: **NTFS DOCX write corruption** — writing ZIP files directly to `~/...` produces `BadZipFile`. Always write to `/tmp/` first, then copy back. See `proof-paper-cross-ref-revision/references/v51-p0-rapid-fix-pipeline.md`.
 
 ### V50 Neutrino Condensation Paper (2026-07-13)
 
@@ -1168,3 +1183,146 @@ When counting `axiom`, `theorem`, `sorry` in Lean files for review purposes, sim
 In Lean, `:= True` is syntactically distinct from `sorry` — it typechecks as a complete proof. But for verification purposes, it's equivalent to a hidden sorry (empty proof body). Papers that claim "zero sorry" must also disclose the `:= True` stub count. V50 had 17 stubs undisclosed.
 
 When running hybrid review via `execute_code`, the 300s hard timeout is insufficient for 5 sequential API calls. Always use `terminal(background=true, notify_on_complete=true)` with timeout≥600s, or split into separate foreground calls.
+
+### 6. Temporal Memory 记录（LWC 集成，2026-10-03）
+
+审稿完成后，把「有意义的事件边界」记录到 LWC temporal memory，让跨版本修正记录（决策/试错/未解决）可跨会话召回——这是 Hermes `memory` 工具明确不存、`session_search` 又存不好的缺口。
+
+**记录时机**（非每次工具调用，只在有意义边界）：
+- hybrid review 完成 → 记录 `decision`(评分) + `outcome`(P0-P3 缺陷清单) + `unresolved`(未解决)
+- 关键修复决策 → 记录 `decision` + `learned`（如"0-axiom 重构替代 39-axiom 闭合"）
+- 版本里程碑 → 记录 `outcome`（如"编译 8726 jobs 0 error"）
+
+**命令**（WSL 必须先 `export HOME=/root`，否则报 home_not_set）：
+```bash
+export HOME=/root
+lwc --scope global remember --json '{
+  "type":"review",
+  "context":"论文名-版本号",
+  "decision":["评分 N/10，READY/MAJOR/NOT READY"],
+  "outcome":["P0缺陷...","P1缺陷..."],
+  "unresolved":["需要领域专家解决的数学基础问题..."]
+}'
+```
+
+**召回**（审稿前先查历史，避免重复踩坑）：
+```bash
+lwc --scope global memory recall "<论文名 版本 缺陷关键词>" --limit 5
+```
+
+**Skip**：常规进度、瞬时工具输出、secrets、稳定 Wiki 事实（应写 Wiki 而非 temporal）、普通聊天。
+**Event 字段**：type(自由串) / context(必填) / decision / outcome / learned / unresolved / observed / changes[{subject,before,after,reason}] / evidence[{reference,excerpt}] / pinned / valid_from / valid_to。
+
+---
+
+## SkillOpt 优化增量 (v1.4.0, 2026-10-07)
+
+**NEW in v1.4.0** (from SkillOpt checklist-based ReflACT, 2026-10-07): **假阳性检测四类规则落地**。补齐审稿假阳性检测的 4 个盲区：定理名暗示（仅凭名号否定、无前提核对）/ 术语已定义（正文已定义但审稿人声称未定义）/ 过度报告对抗（证据门槛+置信度门槛+假阳性过滤器三道闸门）/ 反触发排除（约定依赖值+算术误判+因子系数）。每条规则含触发条件 + 反触发条件 + P0-P3 分级判据。
+
+---
+
+### h05 定理名暗示检测
+
+**目的**：识别审稿意见中仅凭“定理名/方法名/经典结论名”暗示问题、而未给出可核验依据的指控，避免以名号代替论证。
+
+**触发条件**（满足任一即进入候选）：
+- 审稿意见出现“由 XX 定理可知”“根据 XX 引理显然”“这是 XX 悖论/XX 反例”等表述，但未给出该定理的适用前提核对。
+- 审稿意见用命名结论（如“中心极限”“大数定律”“无免费午餐”“不可能三角”“CAP”）直接否定稿件结论，未说明稿件条件与该命名结论前提的对应关系。
+- 审稿意见以“这违反了 XX 原理”作结，未指出被违反的具体命题形式。
+
+**反触发条件**（满足任一即不触发，直接 PASS）：
+- 稿件正文或附录已显式引用同一定理并给出适用条件，审稿意见只是复述该定理名。
+- 审稿意见在给出定理名的同时，附有前提逐条比对（条件 A/B/C 是否满足）与结论差异说明。
+- 命名结论属于稿件自身提出的术语，且稿件已定义（交由 h06 处理，本规则不重复触发）。
+- 审稿意见明确标注为“疑问/待确认”而非断言。
+
+**分级判据**：
+- P0（BLOCK）：仅凭定理名否定稿件核心结论，且无任何前提核对，且该定理前提在稿件中明显不成立或明显成立（即名号与结论无逻辑关联）。
+- P1（WARN）：使用定理名暗示问题，前提核对缺失，但方向可能成立，需审稿人补充前提比对。
+- P2（WARN）：定理名使用正确但表述含糊，建议补一句适用条件。
+- P3（PASS）：定理名 + 前提核对齐全，或属反触发条件。
+
+---
+
+### h06 术语已定义检测
+
+**目的**：拦截“正文已定义、审稿人却声称未定义/定义不清”的假阳性。
+
+**触发条件**：
+- 审稿意见出现“未定义”“定义不清”“概念模糊”“未给出定义”等表述，指向某个术语 T。
+- 需在稿件中检索 T 及其同义/缩写/首次出现形式。
+
+**反触发条件**（满足任一即不触发，直接 PASS）：
+- 稿件在 T 首次出现处或术语表/符号表中给出了定义，且定义可定位（给出章节/行号）。
+- 稿件给出了 T 的操作性定义（即使非形式化），且审稿意见未指出该操作性定义的具体缺陷。
+- 审稿意见实际想说的是“定义与后文用法不一致”，此时应转为一致性问题，不由本规则触发。
+- T 属于领域内公认可省略定义的标准术语（如“梯度”“矩阵秩”），且稿件未将其作为自定义概念使用。
+
+**分级判据**：
+- P0（BLOCK）：稿件已给出明确定义且可定位，审稿意见仍断言“未定义”，属事实性假阳性。
+- P1（WARN）：稿件有定义但位置靠后/分散，审稿人可能漏看；建议审稿人复核位置，同时提示作者前置定义。
+- P2（WARN）：稿件定义存在但表述含糊，审稿意见“定义不清”部分成立。
+- P3（PASS）：稿件确实未定义，或属反触发条件。
+
+**执行要求**：判定 P0 时必须附稿件中定义所在的章节/行号作为证据，否则降级为 P1。
+
+---
+
+### h08 过度报告对抗机制
+
+**目的**：审计型技能 recall 天然接近满分、precision 易偏低。本规则为所有检测规则加装统一的三道闸门，抑制过度报告。
+
+**三道闸门**（任一规则输出前必须依次通过）：
+
+1. **证据门槛**：每条指控必须附可定位证据（章节/行号/公式编号/原文摘录）。无证据 → 不得输出为 BLOCK/WARN，只能降为“待确认”。
+2. **置信度门槛**：每条输出标注置信度 high / medium / low。
+   - high：证据直接、无歧义。
+   - medium：证据存在但需推断。
+   - low：仅模式匹配、无直接证据。
+   - low 置信度不得输出为 P0/P1。
+3. **假阳性过滤器**：输出前对每条指控自问——
+   - 该问题是否已被稿件其他位置覆盖？（查 h06）
+   - 该指控是否依赖审稿人自身的约定/算术？（查 h11）
+   - 该指控是否只是命名暗示？（查 h05）
+   - 若任一为“是”，先走对应规则的降级流程。
+
+**反触发条件**（满足任一即不触发本闸门、按原规则输出）：
+- 指控涉及安全性/正确性硬缺陷（如证明断裂、数据造假迹象），此时证据门槛可放宽至“可复现的推理链”。
+- 审稿意见本身已标注为“建议/可选”。
+
+**分级判据**：
+- P0（BLOCK）：三道闸门全过 + 置信度 high + 证据可定位。
+- P1（WARN）：三道闸门全过 + 置信度 medium。
+- P2（WARN）：证据门槛过、置信度 medium 但影响面小。
+- P3（PASS）：任一闸门未过，或属反触发条件。
+
+**输出格式要求**：每条 BLOCK/WARN 必须携带字段 `证据=`、`置信度=`、`已过闸门=`，缺字段视为未通过本机制。
+
+---
+
+### h11 反触发/假阳性排除
+
+**目的**：集中处理“约定依赖值”“算术误判”“因子系数”三类高发假阳性，并为每条规则提供显式反触发清单。
+
+**触发条件**（进入本规则核查）：
+- 审稿意见指控某数值/系数/约定“错误”“不一致”“算错”。
+- 审稿意见依赖某个约定值（如 π 取值、浮点精度、单位制、索引起点、归一化方式）作出判断。
+- 审稿意见涉及因子 2、3、1/2、1/3 等常见系数差异。
+
+**反触发条件**（满足任一即不触发，直接 PASS）：
+- 稿件已显式声明所用约定（如“本文 π 取 3.14159”“索引从 0 开始”“采用半精度”），审稿意见未按该声明复算。
+- 差异可由约定不同完全解释（如弧度/角度、行/列主序、有/无偏估计）。
+- 差异为因子 2 或 3，且稿件在相邻位置给出了该因子的来源说明（如“此处为双边”“含归一化常数”）。
+- 审稿意见未给出自己的复算过程，仅断言“数值不对”。
+- 差异落在稿件声明的误差容限/有效数字内。
+
+**分级判据**：
+- P0（BLOCK）：审稿意见的“错误”完全由审稿人自身约定误用或算术失误导致，且稿件约定已显式声明。
+- P1（WARN）：差异可由约定解释，但稿件未显式声明约定，双方均有责任；建议作者补声明。
+- P2（WARN）：差异真实存在但影响有限（如仅影响展示精度）。
+- P3（PASS）：差异真实且影响结论，或属反触发条件。
+
+**执行要求**：
+- 判定 P0 时必须复算并给出审稿人误用点（哪一步约定/算术出错）。
+- 对因子 2/3 类指控，强制要求先核对“单边/双边”“有偏/无偏”“含/不含常数项”三项，未核对不得输出 P0/P1。
+- 本规则与 h08 假阳性过滤器联动：凡本规则判 P0/P3，h08 对应条目同步降级或撤销。
