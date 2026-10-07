@@ -24,8 +24,8 @@
 复审修改后的文件前，**重新拷贝当前版本到代理 prompt 引用的精确路径**，并核对行数：
 
 ```bash
-cp "/mnt/c/.../paper_v9.md" /tmp/paper_rev.txt
-cp "/mnt/c/.../proof_v9.lean" /tmp/lean_rev.txt
+cp "~/.../paper_v9.md" /tmp/paper_rev.txt
+cp "~/.../proof_v9.lean" /tmp/lean_rev.txt
 wc -l /tmp/paper_rev.txt /tmp/lean_rev.txt   # 与主会话已知当前行数一致
 ```
 

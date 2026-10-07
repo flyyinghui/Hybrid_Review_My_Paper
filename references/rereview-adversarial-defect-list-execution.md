@@ -53,6 +53,13 @@ Follow-up Hybrid Review of a REVISED paper whose prior review already produced a
 - API smoke-test first (single tiny call) to confirm model name + thinking-disabled returns content.
 - `terminal(background=true, notify_on_complete=true)`; stdout is buffered under background mode — poll the `.part` files / output dir, not the process stdout, for progress.
 
+## Python scripting pitfalls (2026-10-03 re-confirmed)
+
+Two syntax traps bite when authoring the re-review script (both hit this session):
+
+- **f-string expression cannot contain a backslash** (Python 3.11, `execute_code`): `f"...{count(r'^\s*theorem\s')}..."` → `SyntaxError: f-string expression part cannot include a backslash`. Fix: hoist the regex to a variable first (`pat = r'^\s*theorem\s'` then `f"...{count(pat)}"`), or use `%`-formatting. This re-surfaces on any comment-stripping / Lean-stats-counting script inside `execute_code`.
+- **ASCII double-quotes inside Chinese prompt strings collide with the string delimiter**: a ROLE_PROMPTS value written as `"...如 "22 theorems" vs "29 theorems"..."` terminates the outer `"..."` string early → SyntaxError. Fix: quote inner English terms with Chinese corner quotes 『』/「」, or triple-quote the whole value. Same trap applies to any prompt-embedding dict mixing Chinese narration with quoted English terms (theorem names, string literals like `"isthe"`, `"S. Coleman"`).
+
 ## Lean stats counting (must be comment-stripped, authoritative)
 
 - Strip nested block comments with a depth-tracking state machine; non-greedy `re.sub(r'/-.*?-/','',flags=re.S)` FAILS on nested `/-` (see `references/lean-nested-block-comment-sorry-pitfall.md`).
@@ -63,3 +70,5 @@ Follow-up Hybrid Review of a REVISED paper whose prior review already produced a
 ## Known trap (reconfirmed this session)
 
 All 5 reviewers may return an IDENTICAL score (here 5.5/10) — treat that as "objective residual defects, not reviewer disagreement", and focus the report on the verdict tallies + new findings rather than the spread.
+
+**Score-scale confusion (2026-10-03)**: the JSON contract's `"score": 0.0` is ambiguous — reviewers default to a 0–1 scale and return meaningless 0.62/0.55/0.0 values unless the prompt EXPLICITLY states "score is 0–10, 10 is highest (NOT 0–1)". Symptom: three consecutive re-review rounds returned scores clustered at 0.0–0.62 (unusable); only after adding the explicit scale sentence did reviewers return 4.5. **Fix**: for any scoring terminal review, (a) state the 0–10 scale in the preamble, and (b) request a six-dimension breakdown (originality/correctness/significance/clarity/formalization_rigor/honesty) so the total is interpretable. For a pure fix-verification re-review, drop `score` from the contract entirely — verdict tallies (fixed/remain/partial) are the only signal you need.
