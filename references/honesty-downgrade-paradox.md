@@ -42,3 +42,37 @@ When a central claim is found to be a definition rather than a derivation:
 4. Rename: "Coherence Identity" → "Coherence Correspondence"
 5. Adjust predictive degree to honest count (+3→+1)
 6. Add calibration declaration for any phenomenologically fixed coefficients
+
+## Full recovery arc: the downgrade is not the endpoint
+
+The V55→V57 trajectory ended at the DOWNGRADE (3.4). A later paper (LightSpeed_Phase_Boundary,
+2026-10) exhibited the FULL arc across 4 rounds, confirming the paradox resolves into a recovery
+once the honesty becomes *systematic*:
+
+| Round | Change | Score | Verdict |
+|:--|:--|:--:|:--|
+| R1 | initial (overclaiming: c²=3 "derived", SL(6,C) "framework") | 6.3 | MAJOR |
+| R2 | first honesty pass (strips the marketing layer) | 5.46 | MAJOR (edge REJECT) |
+| R3 | SL(6,C) real-form module added, but c²=3 still tagged [T] | 5.6 | MAJOR |
+| R4 | c²=3→[M], Eq.(1) downgraded, [T]/[M]/[O] on ALL 15 props, SL(6,C) honestly "provenance" | 7.0 | MINOR |
+
+The dip (R2) is the cost of removing overclaim. The recovery (R4) is the reward of *consistent*
+scoping: reviewers flip from "this overclaims" to "this honestly maps the boundary — a legitimate
+contribution." Reviewer verbatim at the turn: "crossed the threshold from 'overclaiming framework
+paper' to 'honestly scoped conditional compatibility construction.'"
+
+**Lesson**: a single honesty pass LOWERS the score; a *complete* honesty pass (every proposition
+tagged, every "derived" downgraded to "choice", the framework honestly framed as provenance not
+derivation) RAISES it past the starting point. Don't stop at the downgrade — push through to
+systematic scope tags.
+
+## MINOR→ACCEPT finishing items (recurring at convergence)
+
+When a hybrid-review cycle converges to MINOR REVISION, reviewers consistently ask for three
+finishing items before ACCEPT:
+1. **Split the [M] tag** — it conflates "matched input" / "analytical under hypotheses" / "open
+   bridge". Use [M] (matched input) vs [A] (analytical under stated hypotheses) vs [O] (open).
+2. **Full `#print axioms` enumeration** — a "representative subset" is honestly labeled but still
+   flagged; either enumerate all theorems or argue the rest are same-syntactic-form.
+3. **Tighten abstract verbs** — "matched rates *give* exponent 140/3" still reads as derivation;
+   prefer "imply"/"fix a model relaxation exponent" and name the ratio, not "the speed".

@@ -1,4 +1,4 @@
-# Multi-Paper Cross-Review with DeepSeek V4-Flash Thinking
+# Multi-Paper Cross-Review with DeepSeek V4-Flash <user>ing
 
 ## When to Use
 
@@ -6,7 +6,7 @@ When you need to review **3+ papers simultaneously** with cross-paper consistenc
 
 **Advantages over delegate_task**:
 - Single API call → no batch coordination, no synthesis overhead
-- Thinking mode provides 30-50K chars of reasoning trace (useful for diagnosis)
+- <user>ing mode provides 30-50K chars of reasoning trace (useful for diagnosis)
 - Cross-paper numerical consistency is checked in one context window
 - ~3-5 minutes total (vs 5-10 minutes for multi-agent)
 
@@ -87,13 +87,13 @@ resp = client.chat.completions.create(
     timeout=600,
 )
 
-# Thinking trace in reasoning_content, final answer in content
+# <user>ing trace in reasoning_content, final answer in content
 reasoning = getattr(resp.choices[0].message, 'reasoning_content', '')
 content = resp.choices[0].message.content
 
 # Save both
 with open(output_path, 'w') as f:
-    f.write(f"# Review — V4-Flash Thinking\n")
+    f.write(f"# Review — V4-Flash <user>ing\n")
     f.write(f"Reasoning: {len(reasoning)} chars | Content: {len(content)} chars\n")
     f.write("---\n")
     f.write(content)

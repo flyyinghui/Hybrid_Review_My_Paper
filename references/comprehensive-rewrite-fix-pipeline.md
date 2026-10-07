@@ -20,7 +20,7 @@ Write explicit replacement text for each fix. For section rewrites, provide the 
 
 ### Step 3: Single v4-flash Call
 - Model: `deepseek-v4-flash`
-- Thinking: DISABLED (`extra_body={"thinking": {"type": "disabled"}}`)
+- <user>ing: DISABLED (`extra_body={"thinking": {"type": "disabled"}}`)
 - Temperature: 0.1
 - Max tokens: 24576-28672
 - Timeout: 600s
