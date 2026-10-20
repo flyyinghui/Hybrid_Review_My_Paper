@@ -11,7 +11,7 @@
 
 ## 历史报告中的结构化发现（可作分级器训练数据）
 
-扫描桌面 `<projects>/` 下 483 个 md（163 审稿报告），提取粗体编号分级发现：
+扫描桌面 `papers/` 下 483 个 md（163 审稿报告），提取粗体编号分级发现：
 
 - 总数 **463 条**（31 个文件有结构化发现）
 - 分布：P0=105 / P1=146 / P2=120 / P3=65 / C/CRITICAL=27
@@ -19,7 +19,7 @@
 
 ## 关键陷阱：标签是 LLM 自评，不是人工 gold label
 
-这些 P 级来自 LLM 审稿人，本身有噪声（v4-pro 单独审计不可靠、v4-flash false-positive）。
+这些 P 级来自 LLM 审稿人，本身有噪声（v4-pro 单独审计不可靠、deepseek-flash false-positive）。
 直接用它们训练分级器会继承 LLM 的 bias。
 
 **去噪手段**：用跨轮 resolution table 筛高置信子集——

@@ -28,8 +28,8 @@ skill_view(name='ars-awa-hybrid-review')  # review protocol
 
 ### Stage 3: Deep Reasoning (background)
 
-Use `deepseek-v4-flash` with thinking mode:
-- `model="deepseek-v4-flash"`
+Use `deepseek-flash` with thinking mode:
+- `model="deepseek-flash"`
 - `max_tokens=32768`
 - `extra_body={"thinking": {"type": "enabled"}}`
 - `timeout=300+`
@@ -51,7 +51,7 @@ Output sections:
   5. 协同演进路线图 (Co-evolution timeline)
 ```
 
-**Pitfall**: `deepseek-v4-pro` hangs on large prompts (>40K chars). Always use v4-flash for full-paper analysis.
+**Pitfall**: `deepseek-v4-pro` hangs on large prompts (>40K chars). Always use deepseek-flash for full-paper analysis.
 
 ### Stage 4: Human-Readable Synthesis
 
@@ -102,7 +102,7 @@ Example from V17↔V61:
 
 ## Pitfalls
 
-1. **v4-pro hang on large prompts**: >40K chars → v4-pro silent hang (0% CPU). Always use v4-flash.
-2. **thinking mode content fallback**: v4-flash thinking may put output in `reasoning_content` field, not `content`. Always check both.
+1. **v4-pro hang on large prompts**: >40K chars → v4-pro silent hang (0% CPU). Always use deepseek-flash.
+2. **thinking mode content fallback**: deepseek-flash thinking may put output in `reasoning_content` field, not `content`. Always check both.
 3. **Wrong paper version**: User may point to "六维流形时空理论模型.docx" (9.2MB old version) instead of the current V17. Verify version before analysis. Per memory: "旧版'六维流形时空理论模型.docx'（9.2MB/1298段）非V17，不可混用"
 4. **Brain recall method**: `brain.recall()` returns dict list (NOT object list). Use `r.get('content','')` not `getattr()`. Single-load for multiple queries (60-170s load, then ~0.8s/query) vs per-query subprocesses (15min for 9 queries).

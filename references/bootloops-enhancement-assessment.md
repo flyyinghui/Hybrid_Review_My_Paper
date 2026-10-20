@@ -64,7 +64,7 @@ v1.2.0 已集成的检测能力（规则组 A–F + Quality Gates）：
 | **hedge-blur** | 修复时削弱所有 claim 而非 scope 一次 | 「统一」→「组织」→「对应」的渐进模糊 |
 | **缺失受众** | 借用的方法/数据集社区没拿到审计行 | 中微子论文借 seesaw 机制，却未审「incumbent = 标准 seesaw 社区」 |
 | **新颖性-正确性混淆** | 只答一轴 | 论文证明一切却不言明「比标准 seesaw 新在哪」 |
-| **友好读者/strawman** | 模拟审稿继承作者框架，只提已答的弱反对 | 5-agent 用同一 v4-flash 生成=同盲点 |
+| **友好读者/strawman** | 模拟审稿继承作者框架，只提已答的弱反对 | 5-agent 用同一 deepseek-flash 生成=同盲点 |
 
 **关键操作**：受众枚举（含 incumbent + borrowed-authority）→ 每受众两轴（correctness + novelty）→ steelman 三测试（sting / knowledge / lead）→ 验证答案在反对者的阅读路径上 → 摘要单独冷读最后审 → 最小 scope 编辑（禁 hedge-blur）→ 裁决表。
 
@@ -100,9 +100,9 @@ v1.2.0 已集成的检测能力（规则组 A–F + Quality Gates）：
 
 **核心原则**：喂过拟合的 oracle 永远不能认证结果。
 
-**对应 hybrid-review 的真实缺口**：审稿 agent 用 v4-flash，被审论文也是 v4-flash 生成 → **同一模型的盲点双向传染**（referee-sim 称之为「author-context contamination」的审查版）。
+**对应 hybrid-review 的真实缺口**：审稿 agent 用 deepseek-flash，被审论文也是 deepseek-flash 生成 → **同一模型的盲点双向传染**（referee-sim 称之为「author-context contamination」的审查版）。
 
-**hybrid-review 已隐约意识到**（gate 执行纪律第 6 条：「若综合分仅由 v4-pro/v4-flash 单模型给出且落在 7–8 边界，建议补 held-out 终审」），但未系统化。
+**hybrid-review 已隐约意识到**（gate 执行纪律第 6 条：「若综合分仅由 v4-pro/deepseek-flash 单模型给出且落在 7–8 边界，建议补 held-out 终审」），但未系统化。
 
 **系统化方案**（来自 prove-protocol 的「强制结构多样性」）：
 - generate（论文/证明）与 audit（审稿）**必须用不同模型或不同结构**

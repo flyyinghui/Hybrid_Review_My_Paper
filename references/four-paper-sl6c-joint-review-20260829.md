@@ -9,10 +9,10 @@
 
 ## 执行模式（可复用）
 
-**5 代理串行 v4-flash（thinking disabled）**，每代理输出立即写 `.part` 文件，
+**5 代理串行 deepseek-flash（thinking disabled）**，每代理输出立即写 `.part` 文件，
 最后编译合并。全程 **~235 秒**（4 分钟）完成 4 篇论文。
 
-- 模型：`deepseek-v4-flash` + `extra_body={"thinking": {"type": "disabled"}}`，
+- 模型：`deepseek-flash` + `extra_body={"thinking": {"type": "disabled"}}`，
   `max_tokens=8192, temperature=0.0, timeout=600`
 - 串行（DeepSeek 速率限制），每代理后 `time.sleep(2)`
 - 每个代理输出写 `/tmp/review_<name>.part`（防超时丢失）

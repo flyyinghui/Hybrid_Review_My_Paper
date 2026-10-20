@@ -52,4 +52,4 @@ V19 是 V18 的诚实化重写（80 公理 → 0 公理，S/A/M/C/O 证据词汇
 - **核心结论**：V19 把「语言借用」升级为「条件桥接模板」——母方程管骨架，桥接管语义（响应系数 κ/ν/ρ_*/ε 为外部输入）。
 - **评分**：内部一致性 6.5→8.0，动力学遵循度 4.8→5.5（两维度正交，须分别报告）；综合 5.6→7.2。
 - **诚实化路径验证有效**：删全局公理 + 显式「条件桥接」+ 边界标注，确实把 Phase II 的 OT→time 伪推导（V18 的「transport ray = time」postulate）降级为显式 M 级 Ansatz，Phase II 不再是最差的 language_only。
-- 双 LLM 执行配方（v4-pro 推理 + v4-flash 撰写）见 `references/dual-llm-v4pro-reason-v4flash-write.md`。
+- 双 LLM 执行配方（v4-pro 推理 + deepseek-flash 撰写）见 `references/dual-llm-v4pro-reason-v4flash-write.md`。

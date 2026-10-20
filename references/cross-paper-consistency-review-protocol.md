@@ -38,7 +38,7 @@ The paper that has undergone more rigorous review (more review rounds, transpare
 Produce a detailed changelist showing exactly what must change in the non-ground-truth paper to align.
 
 ### Step 6: Execute the replacement
-Use `write_file` for new content generation (v4-pro for max 8192 tokens, v4-flash for reliability), then python-docx paragraph-level replacement.
+Use `write_file` for new content generation (v4-pro for max 8192 tokens, deepseek-flash for reliability), then python-docx paragraph-level replacement.
 
 ## Key Pitfalls
 

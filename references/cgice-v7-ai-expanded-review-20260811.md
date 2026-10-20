@@ -2,7 +2,7 @@
 
 ## Context
 
-V6 CGICE paper (190 lines, 11K chars, 14 axioms, 3 theorems) was expanded to V7 (780 lines, 46K chars) via DeepSeek v4-flash. Expansion added CGICE-1~4 dynamical equations, two appendices, §2.5-2.7 (phase space), T4 theorem, and expanded references.
+V6 CGICE paper (190 lines, 11K chars, 14 axioms, 3 theorems) was expanded to V7 (780 lines, 46K chars) via deepseek-flash. Expansion added CGICE-1~4 dynamical equations, two appendices, §2.5-2.7 (phase space), T4 theorem, and expanded references.
 
 ## Review Configuration
 

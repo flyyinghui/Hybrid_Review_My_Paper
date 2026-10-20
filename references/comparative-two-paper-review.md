@@ -28,6 +28,6 @@ Found fatal SU(3,3)/SU(6) moduli space contradiction. V61 (6.0/10) > V17 (4.0/10
 
 ## Pitfalls
 
-1. **v4-pro timeout >150K chars**: use v4-flash for full-paper review prompts
+1. **v4-pro timeout >150K chars**: use deepseek-flash for full-paper review prompts
 2. **Cross-batch context**: feed raw batch 1 summaries into batch 2, not just task descriptions
 3. **Separate extraction files**: never loop two papers to same output path (last-write overwrites first)

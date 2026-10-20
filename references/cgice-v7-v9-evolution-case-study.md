@@ -20,7 +20,7 @@ V9's fixes were applied as banner notes (e.g., `[V9.1 P0 FIXES 2026-08-11]`) app
 ### 2. v4-pro Single-Audit Over-Generosity
 v4-pro scored V9 9/10 without detecting: phantom predictions (w₀=-0.727 with zero derivation), LUCDM comparison table actually weakening the paper, Lean α reciprocal algebra error, RG arithmetic error, Poincaré polynomial falsehood, compact dual misidentification. Multi-agent adversarial panel found all of these.
 
-### 3. DeepSeek v4-flash Rewrite Reliability
+### 3. deepseek-flash Rewrite Reliability
 V7→V8: 64.3s, 10/12 P0 effectively fixed. Good for structural reorganizations (move sections, replace false derivations) and language-level fixes (honesty pass).
 
 V9→V10: Same approach with stricter instructions ("Do NOT add header notes"). More reliable when explicit grep-verification commands are included in the prompt.

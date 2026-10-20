@@ -1,4 +1,4 @@
-# DOCX CN Translation Pipeline — DeepSeek v4-flash with Checkpoint
+# DOCX CN Translation Pipeline — deepseek-flash with Checkpoint
 
 Reusable pattern for translating academic physics papers (EN→CN) via DeepSeek API
 with batch checkpointing and python-docx reconstruction.
@@ -30,7 +30,7 @@ for p in doc.paragraphs:
 
 ### Phase 2: Batch Translate with Checkpoint
 
-**Critical**: Use `[N] text` output format, NOT `<SEP>` markers. DeepSeek v4-flash
+**Critical**: Use `[N] text` output format, NOT `<SEP>` markers. deepseek-flash
 naturally produces `[N] Chinese translation` with blank-line paragraph separation.
 `<SEP>` markers are inconsistently honored by the model and cause 0/35 parse failures.
 
@@ -78,7 +78,7 @@ from openai import OpenAI
 client = OpenAI(api_key=key, base_url="https://api.deepseek.com")
 
 resp = client.chat.completions.create(
-    model="deepseek-v4-flash",
+    model="deepseek-flash",
     messages=[...],
     max_tokens=16384,
     temperature=0.1,
@@ -86,7 +86,7 @@ resp = client.chat.completions.create(
 )
 ```
 
-**v4-flash thinking-mode trap**: Without `extra_body={"thinking": {"type": "disabled"}}`,
+**deepseek-flash thinking-mode trap**: Without `extra_body={"thinking": {"type": "disabled"}}`,
 the model routes output to `reasoning_content` instead of `content`, returning empty
 translation text. This is the #1 cause of 0-paragraph failures.
 

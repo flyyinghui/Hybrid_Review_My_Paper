@@ -4,7 +4,7 @@
 
 ## When to Use
 
-When a hybrid review finds 10+ P0/P1 fixes and they need to be applied in a single pass. Traditional patch-by-patch would take 30+ minutes of manual editing. A single comprehensive DeepSeek v4-flash call applies all fixes in ~60 seconds.
+When a hybrid review finds 10+ P0/P1 fixes and they need to be applied in a single pass. Traditional patch-by-patch would take 30+ minutes of manual editing. A single comprehensive deepseek-flash call applies all fixes in ~60 seconds.
 
 ## Protocol (6 Steps)
 
@@ -18,9 +18,9 @@ Categorize every review finding:
 ### Step 2: Build Fix Instructions
 Write explicit replacement text for each fix. For section rewrites, provide the EXACT replacement text (not "change X to be more honest about Y" — give the actual new paragraph).
 
-### Step 3: Single v4-flash Call
-- Model: `deepseek-v4-flash`
-- <user>ing: DISABLED (`extra_body={"thinking": {"type": "disabled"}}`)
+### Step 3: Single deepseek-flash Call
+- Model: `deepseek-flash`
+- Thinking: DISABLED (`extra_body={"thinking": {"type": "disabled"}}`)
 - Temperature: 0.1
 - Max tokens: 24576-28672
 - Timeout: 600s
@@ -43,7 +43,7 @@ Single v4-pro audit to check fix direction — NOT a quality gate (see Pitfall 1
 
 1. **F-string brace conflicts**: Fix instructions containing LaTeX with curly braces (`f^{k}_{munu}`) MUST use `.replace()` or `.format()` with careful escaping, NOT f-strings.
 
-2. **Prompt size**: V7→V8 prompt was 53K chars — near but within the safe zone for v4-flash. Larger papers may need section-by-section fixing.
+2. **Prompt size**: V7→V8 prompt was 53K chars — near but within the safe zone for deepseek-flash. Larger papers may need section-by-section fixing.
 
 3. **Over-fixing**: The DeepSeek rewrite may apply fixes that weren't requested (e.g., adding new sections). Always diff the output against the original.
 
