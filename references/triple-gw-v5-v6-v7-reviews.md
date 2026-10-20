@@ -38,7 +38,7 @@ All three reviews used the same script template:
 The V6 DOCX was silently corrupted during XML-level editing — ZIP integrity OK but only 488 chars of text. Reviewers received only the Lean proof + V5 memory. **Lesson**: Always run `len(extracted_text) > 5000` sanity check after any DOCX modification.
 
 ### Review Execution Speed
-All 3 reviews completed in <2 minutes each (5 agents × ~20s avg). v4-flash with `temperature=0.0` and `thinking=disabled` proved reliable for review tasks. No timeout or JSON parse errors across 15 agent calls.
+All 3 reviews completed in <2 minutes each (5 agents × ~20s avg). deepseek-flash with `temperature=0.0` and `thinking=disabled` proved reliable for review tasks. No timeout or JSON parse errors across 15 agent calls.
 
 ### Adversarial Context Efficacy
 V7 review explicitly cross-referenced V5+V6 P0 lists. Reviewers correctly identified which V5 issues were "partially fixed" vs "still present" vs "new in V7". This validates the adversarial context injection pattern established in earlier sessions.

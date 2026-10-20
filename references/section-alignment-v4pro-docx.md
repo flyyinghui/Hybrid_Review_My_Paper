@@ -26,7 +26,7 @@ When two papers have diverged on a shared topic (GW peaks, H₀ status, λ_KLS u
 ## Pitfalls
 
 ### v4-pro timeout on 8192 tokens
-v4-pro may hang on max_tokens=8192 (known trap). If >4 min with no output, kill and fall back to v4-flash (thinking=disabled). v4-flash is faster but may produce slightly lower-quality prose.
+v4-pro may hang on max_tokens=8192 (known trap). If >4 min with no output, kill and fall back to deepseek-flash (thinking=disabled). deepseek-flash is faster but may produce slightly lower-quality prose.
 
 ### DOCX paragraph boundary mismatch
 Generated text often has different paragraph count than target DOCX. Solution: merge remaining new paragraphs into last target paragraph, or add new paragraphs via `doc.add_paragraph()`.

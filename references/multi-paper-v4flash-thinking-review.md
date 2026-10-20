@@ -1,4 +1,4 @@
-# Multi-Paper Cross-Review with DeepSeek V4-Flash <user>ing
+# Multi-Paper Cross-Review with DeepSeek V4-Flash Thinking
 
 ## When to Use
 
@@ -6,7 +6,7 @@ When you need to review **3+ papers simultaneously** with cross-paper consistenc
 
 **Advantages over delegate_task**:
 - Single API call → no batch coordination, no synthesis overhead
-- <user>ing mode provides 30-50K chars of reasoning trace (useful for diagnosis)
+- Thinking mode provides 30-50K chars of reasoning trace (useful for diagnosis)
 - Cross-paper numerical consistency is checked in one context window
 - ~3-5 minutes total (vs 5-10 minutes for multi-agent)
 
@@ -80,20 +80,20 @@ from openai import OpenAI
 client = OpenAI(api_key=API_KEY, base_url="https://api.deepseek.com")
 
 resp = client.chat.completions.create(
-    model="deepseek-v4-flash",  # thinking mode is DEFAULT
+    model="deepseek-flash",  # thinking mode is DEFAULT
     messages=[{"role": "user", "content": prompt}],
     max_tokens=24576,
     temperature=0.0,
     timeout=600,
 )
 
-# <user>ing trace in reasoning_content, final answer in content
+# Thinking trace in reasoning_content, final answer in content
 reasoning = getattr(resp.choices[0].message, 'reasoning_content', '')
 content = resp.choices[0].message.content
 
 # Save both
 with open(output_path, 'w') as f:
-    f.write(f"# Review — V4-Flash <user>ing\n")
+    f.write(f"# Review — V4-Flash Thinking\n")
     f.write(f"Reasoning: {len(reasoning)} chars | Content: {len(content)} chars\n")
     f.write("---\n")
     f.write(content)
@@ -119,9 +119,9 @@ Results: 10 P0 issues across 3 papers, 15-parameter cross-paper matrix, 11 numer
 
 ## Pitfalls
 
-1. **Prompt too large**: If the combined prompt exceeds ~120K chars, v4-flash may truncate. Target <80K chars. Use `paper_text[:15000]` per paper.
+1. **Prompt too large**: If the combined prompt exceeds ~120K chars, deepseek-flash may truncate. Target <80K chars. Use `paper_text[:15000]` per paper.
 
-2. **Missing content**: v4-flash thinking mode may produce `content=""` if reasoning exhausts the token budget. Use `max_tokens=24576` minimum. If content is empty, check reasoning_content for partial results.
+2. **Missing content**: deepseek-flash thinking mode may produce `content=""` if reasoning exhausts the token budget. Use `max_tokens=24576` minimum. If content is empty, check reasoning_content for partial results.
 
 3. **Format instability**: The output format depends on prompt instructions. Be explicit: "Provide a structured review in Markdown with these sections: 1. Individual Paper Reviews 2. Cross-Paper Matrix 3. Numerical Audit 4. Publication Recommendations 5. Priority Fix Roadmap"
 

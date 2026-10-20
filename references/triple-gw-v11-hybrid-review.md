@@ -6,7 +6,7 @@
 - **Lean**: 811 lines, 8 axioms, 28 theorems, 11 lemmas, 36 defs, 0 sorries (comment-stripped)
 - **Reviewers**: 5-agent panel (EIC/MATH/GW/COSMO/DEVIL)
 - **Adversarial context**: Injected V5→V6→V7 review trajectory
-- **API**: deepseek-v4-flash, max_tokens=8192, temperature=0.0
+- **API**: deepseek-flash, max_tokens=8192, temperature=0.0
 
 ## Scores
 
@@ -47,5 +47,5 @@ Triple GW papers appear to have a natural ceiling at ~2.0 because:
 
 1. **Adversarial context injection works**: V11 reviewers received V5-V7 P0 lists and correctly tracked fix status
 2. **v4-pro via Anthropic SDK**: For deep mathematical analysis, Anthropic SDK + `base_url=https://api.deepseek.com/anthropic` + `timeout=900` reliably returns. OpenAI SDK + v4-pro hangs silently.
-3. **v4-flash for full-paper review**: Reliable for 50K-char prompts, 30-50s per reviewer.
+3. **deepseek-flash for full-paper review**: Reliable for 50K-char prompts, 30-50s per reviewer.
 4. **Split v4-pro queries**: Split into independent sub-queries (one per P0) to avoid timeouts.

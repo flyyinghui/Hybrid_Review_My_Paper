@@ -3,7 +3,7 @@
 **日期**：2026-09-02
 **对象**：`paper_triple_gw_v17.md` + `triple_gw_dm_proof_v17.lean` + `HonestAttr.lean`
 **母框架**：`SL6C_Unified_Geometric_Dynamics_Framework.md`（已先加载，见 `parent-framework-review-prerequisite.md`）
-**方法**：Lean 机械审计（注释剥离状态机 + 精确统计）+ Python 数值独立重算 + 大脑 recall + v4-flash 交叉验证
+**方法**：Lean 机械审计（注释剥离状态机 + 精确统计）+ Python 数值独立重算 + 大脑 recall + deepseek-flash 交叉验证
 **评分**：证据链 4.5/10，数值 4.5/10，综合 4.5/10
 
 ## V17 相对 V16 的实质进步（诚实度系列最佳）
@@ -55,9 +55,9 @@ def strip_comments(text):
 
 剥离后再 `re.findall(r'^\s*axiom\s+(\w+)', stripped, re.M)` 计数，得到精确统计（V17 实际 65 axioms/56 thm/26 lemma/2035 行，而摘要称 57 thm、推导方案称 66/55/2008——三处计数互不一致，是 P1 计数矛盾）。
 
-## v4-flash thinking 深度审查的 content 空陷阱（再次命中）
+## deepseek-flash thinking 深度审查的 content 空陷阱（再次命中）
 
-`extra_body={"thinking":{"type":"enabled"}}` + `max_tokens=8000` 时，v4-flash 会把 token 耗尽在 reasoning 上，`message.content` 为空、推理迹被截断。**交叉验证结论仍可从 reasoning_content 轨迹提取**（本例 v4-flash 的推理逐条认同了机械审计发现），但格式化 JSON 输出应改用 `thinking=disabled` + 让脚本自己重算，而非依赖 LLM 产出结构化结论。
+`extra_body={"thinking":{"type":"enabled"}}` + `max_tokens=8000` 时，deepseek-flash 会把 token 耗尽在 reasoning 上，`message.content` 为空、推理迹被截断。**交叉验证结论仍可从 reasoning_content 轨迹提取**（本例 deepseek-flash 的推理逐条认同了机械审计发现），但格式化 JSON 输出应改用 `thinking=disabled` + 让脚本自己重算，而非依赖 LLM 产出结构化结论。
 
 ## 审计结论要点
 

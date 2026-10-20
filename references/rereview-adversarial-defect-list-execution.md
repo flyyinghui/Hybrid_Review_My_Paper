@@ -4,7 +4,7 @@ Follow-up Hybrid Review of a REVISED paper whose prior review already produced a
 
 ## Model (current, verified 2026-09-13 & 2026-09-19)
 
-- **`deepseek-flash`** — the only valid flash model name. NOT `deepseek-v4-flash`, NOT `deepseek-v4.1-flash`, NOT `deepseek-chat` (all deprecated aliases → empty `content`).
+- **`deepseek-flash`** — the only valid flash model name. NOT `deepseek-flash`, NOT `deepseek-v4.1-flash`, NOT `deepseek-chat` (all deprecated aliases → empty `content`).
 - `deepseek-v4-pro` = the other valid name (reasoner; unreliable for long review prompts, see Pitfall 14).
 - OpenAI SDK, `base_url='https://api.deepseek.com'`.
 - Mandatory: `extra_body={"thinking": {"type": "disabled"}}` — otherwise `content` is empty (output goes to `reasoning_content`).

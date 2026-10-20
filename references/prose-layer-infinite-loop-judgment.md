@@ -26,7 +26,7 @@
 
 ## 复审执行配方（本轮验证的关键参数）
 
-- 模型：`deepseek-flash`（NOT deepseek-v4-flash/deepseek-chat，均已废弃）
+- 模型：`deepseek-flash`（NOT deepseek-flash/deepseek-chat，均已废弃）
 - `extra_body={"thinking":{"type":"disabled"}}`（否则 content 空）
 - 串行 5 代理，每个 ~5-15s（6 万字符 prompt），总计 ~90s
 - 每代理输出立即写 `/tmp/<tag>.part`，JSON 用 `re.search(r'```json\s*(.*?)\s*```')` + `json.loads(raw[s:e+1])` 提取（不是裸 json.loads）

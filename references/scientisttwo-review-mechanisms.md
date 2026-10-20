@@ -31,7 +31,7 @@ Google Cloud AI Research 的全自主科研 agent（**不是审稿工具**）。
 ### 4. Held-out 评审器（防 in-distribution 偏差）
 ScholarPeer = in-distribution（训练期即用于精炼），Stanford Agentic Reviewer = held-out（开发全程未见）。两个都报分才有说服力。
 
-映射：hybrid-review 用 DeepSeek（v4-flash/v4-pro）**同时也是生成模型**，存在 in-distribution 偏差（记忆里已有「v4-pro 单独审计 9/10 实际 2/10」教训）。→ 加一道 held-out 终审：换独立模型（台式机 Ollama qwq:32b）或独立 rubric 做最终 sanity gate。
+映射：hybrid-review 用 DeepSeek（deepseek-flash/v4-pro）**同时也是生成模型**，存在 in-distribution 偏差（记忆里已有「v4-pro 单独审计 9/10 实际 2/10」教训）。→ 加一道 held-out 终审：换独立模型（台式机 Ollama qwq:32b）或独立 rubric 做最终 sanity gate。
 
 ## 实证数据（直接引用）
 

@@ -1,13 +1,13 @@
 # Triple GW V11 Hybrid Review — Formal Verification Trap (2026-07-25)
 
-Fourteenth verified run. 5 agents in single sequential batch. v4-flash via OpenAI SDK. 3.3-minute total.
+Fourteenth verified run. 5 agents in single sequential batch. deepseek-flash via OpenAI SDK. 3.3-minute total.
 
 ## Execution Configuration
 
 ```python
 # 5-agent panel with adversarial context injection
 # Sequential execution, ~40s per reviewer
-# Model: deepseek-v4-flash, temp=0.0, max_tokens=8192
+# Model: deepseek-flash, temp=0.0, max_tokens=8192
 # 45K-char prompt including V5→V6→V7 review trajectory
 ```
 

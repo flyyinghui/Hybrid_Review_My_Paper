@@ -33,6 +33,15 @@
   "advance/deepen/prove/proof" 描述 trivial 构造。
 - **修复**：标注 trivial construction / sanity check，明示**不解决**选择机制开放桥。
 
+### 陷阱 4：逻辑闭环 ≠ 物理闭环（biconditional 定义重言式）
+
+把一个 [M] 匹配假设包装成「闭环 biconditional」`S_inst = λ_⊥ ⟺ g² = 8π²/λ_⊥`，其中
+`S_inst := 8π²/g²` 是定义、`S_inst = λ_⊥` 是假设——整个 biconditional 等价于「除法可逆」
+`a/b = c ⟺ b = a/c`。⟺ 的「双向」外观掩盖了它是逻辑闭环（假设⇔结论）而非物理闭环（推导⇒结论）。
+- **检测信号**：biconditional 一侧是 [M]、另一侧是代入定义的代数结果；证明体 = unfold + field_simp + nlinarith。
+- **修复**：降级措辞为「matching condition restated as a coupling-value identity」，详见
+  `references/logical-closed-loop-vs-physical-derivation.md`。
+
 ---
 
 ## 通用检测信号（5-agent 终审实际抓到的）

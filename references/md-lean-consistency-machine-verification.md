@@ -66,6 +66,14 @@ lean_stats = {'axiom': count(r'^\s*axiom\s'), 'theorem': count(r'^\s*theorem\s')
 里的 "axiom" 字样）。同一文件插入新定理后，附录 A 的计数会**漂移**（如 171→174），
 每次改完 Lean 必须重新统计并同步附录 A 计数。
 
+**`noncomputable def` 计数陷阱（2026-10-13 CGICE V10 实测）**：`def` 的计数正则
+`^\s*def\s` 会**漏掉** `noncomputable def`（Lean 允许 `noncomputable def` 修饰符）。
+CGICE V10 首次统计报 95 def，实际 109（含 14 个 `noncomputable def`），论文附录 A 写
+"109 definitions"——用裸 `^\s*def\s` 会误报"论文 def 计数多报 14"的假阳性。统计 `def`
+必须用 `^\s*(?:noncomputable\s+)?def\s`（前缀可选）。同类修饰符 `unsafe def`、
+`protected def`、`private def` 也要一并考虑，统一用
+`^\s*(?:(?:noncomputable|unsafe|protected|private)\s+)?def\s`。
+
 ## 3. 计数漂移检测
 
 **症状**：插入 N 个新定理后，MD 附录 A 的 theorem 计数还是旧的（如 171，实际 174）。

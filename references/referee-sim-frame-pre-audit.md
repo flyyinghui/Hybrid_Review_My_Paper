@@ -128,7 +128,7 @@ Scope 句、null-hypothesis 陈述、prominence 移动（caveat 从正文移到�
 | hedge-blur | "统一"→"组织"→"对应"的渐进模糊 |
 | 缺失受众 | 中微子论文借 seesaw 机制，未审 incumbent=标准 seesaw 社区 |
 | 新颖性-正确性混淆 | 证明一切却不言明"比标准 seesaw 新在哪" |
-| 友好读者/strawman | 5-agent 用同一 v4-flash 生成=同盲点 |
+| 友好读者/strawman | 5-agent 用同一 deepseek-flash 生成=同盲点 |
 
 ---
 
