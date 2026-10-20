@@ -35,7 +35,7 @@ CONTRIBUTION COMPARISON MODE. Compare against the current research landscape:
 
 ## JSON Parse Failure Pattern
 
-When DeepSeek v4-flash generates `detailed_comments` with embedded double-quotes (e.g., `the "derived" value`), the JSON output is unparseable. Two of six reviewers failed JSON validation.
+When deepseek-flash generates `detailed_comments` with embedded double-quotes (e.g., `the "derived" value`), the JSON output is unparseable. Two of six reviewers failed JSON validation.
 
 **Recovery**: Use regex extraction for individual fields rather than `json.loads()`:
 ```python

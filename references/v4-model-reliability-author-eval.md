@@ -14,5 +14,5 @@
 ## v4 模型可靠性 (2026-08-07)
 
 - **v4-pro**: 对任何长度prompt都可能挂死(实测5.5K→6分钟无响应)。不可靠。
-- **v4-flash thinking**: 可靠但可能token耗尽致content为空→从reasoning_content回退
-- **推荐**: 所有审查任务用v4-flash(thinking或disabled按需选择)
+- **deepseek-flash thinking**: 可靠但可能token耗尽致content为空→从reasoning_content回退
+- **推荐**: 所有审查任务用deepseek-flash(thinking或disabled按需选择)

@@ -2,16 +2,16 @@
 
 ## When to Use
 
-Use **deepseek-v4-pro** (NOT v4-flash) for multi-paper cross-review when:
+Use **deepseek-v4-pro** (NOT deepseek-flash) for multi-paper cross-review when:
 - Reviewing 3+ papers simultaneously with cross-paper consistency checking
 - Papers share a common theoretical framework (e.g., SL(6,C))
 - Each paper has an associated Lean formal proof file
 - Prompt is **< 50K characters** (v4-pro safe zone)
 - User explicitly requests v4-pro or "maximum tokens" reasoning
 
-**Contrast with v4-flash approach** (`references/multi-paper-v4flash-thinking-review.md`):
+**Contrast with deepseek-flash approach** (`references/multi-paper-v4flash-thinking-review.md`):
 - v4-pro: deeper mathematical reasoning, fewer hallucinations, slower (~160s)
-- v4-flash: handles larger prompts (>120K), thinking trace visible, faster (~240s total)
+- deepseek-flash: handles larger prompts (>120K), thinking trace visible, faster (~240s total)
 
 ## Pipeline (6 Steps)
 
@@ -139,7 +139,7 @@ cp /tmp/triple_paper_hybrid_review_v4pro.md "~/Desktop/三论文混合审阅_v4p
 While v4-pro worked for 47K chars, it silently hangs at >120K chars. 
 - **Safe**: <50K chars → always use v4-pro for deep math review
 - **Risky**: 50-100K chars → test carefully
-- **Unsafe**: >120K chars → use v4-flash instead
+- **Unsafe**: >120K chars → use deepseek-flash instead
 
 ### Prompt Truncation
 For papers >100K chars each, extract ONLY the key sections (abstract, core derivations, conclusions). Do NOT include the full paper text. Use regex-extracted numerical claims as a lightweight summary.

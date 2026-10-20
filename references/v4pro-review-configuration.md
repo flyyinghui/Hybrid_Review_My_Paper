@@ -39,11 +39,11 @@ for block in resp.content:
 1. **Prompt size**: Keep under ~60K chars. v4-pro silently hangs on prompts >120K chars.
 2. **Anthropic SDK required**: OpenAI SDK path has known timeout issues with v4-pro for large token generation.
 3. **Timeout ≥900s**: Shorter timeouts kill successful calls. v4-pro can take 3-7 minutes.
-4. **Not for translation**: v4-flash is 3-5x faster and equally capable for translation tasks. Use v4-pro only for deep reasoning reviews.
+4. **Not for translation**: deepseek-flash is 3-5x faster and equally capable for translation tasks. Use v4-pro only for deep reasoning reviews.
 
-## Comparison: v4-pro vs v4-flash for Reviews
+## Comparison: v4-pro vs deepseek-flash for Reviews
 
-| Aspect | v4-pro | v4-flash (thinking) |
+| Aspect | v4-pro | deepseek-flash (thinking) |
 |--------|--------|---------------------|
 | Speed | 136-223s | 60-90s |
 | Reasoning depth | Deeper, more critical | Good, slightly less adversarial |
