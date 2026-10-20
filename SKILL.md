@@ -8,7 +8,7 @@ description: >-
   at Stage 2 (Writing) and Stage 4 (Revision) for fine-grained quality improvement.
   Triggers: hybrid review, ARS+AWA pipeline, integrated paper review, full review pipeline,
   manuscript version comparison (compare two drafts of the same paper for physical self-consistency).
-version: "1.4.0"
+version: "1.7.0"
 model: deepseek-flash
 refs:
   - references/version-comparison-self-consistency.md
@@ -23,13 +23,33 @@ depends_on:
   - academic-paper-reviewer
 ---
 
-# ARS + AWA Hybrid Review Pipeline v1.3
+# ARS + AWA Hybrid Review Pipeline v1.6
 
 Integrated academic paper review pipeline: **ARS backbone** (structural management + formal peer review) × **AWA injection** (granular quality review at writing/revision stages) × **BootLoops frame-audit** (implicature + prose-honesty + number-discipline pre-audit, v1.3).
 
 ```
 ARS RESEARCH → WRITE +[AWA Review]→ INTEGRITY → FORMAL REVIEW → REVISE +[AWA Review]→ RE-REVIEW → FINALIZE
 ```
+
+## EmbeddingGemma-2 集成 (v1.5.0)
+
+**NEW in v1.5.0**: 多论文交叉审稿的语义相似度矩阵。集成 EmbeddingGemma-2（litert-community/embeddinggemma-2-740m-litert-lm，768 维，int4 QAT，8K ctx）。
+
+- 新增 `scripts/cross_paper_semantic.py`：计算多篇论文的两两语义相似度矩阵，输出 top 相似论文对（共享概念 / 可能矛盾 / 可能重复）。
+- 已接入 `scripts/multi_paper_review.py`：审稿 prompt 里自动嵌入「CROSS-PAPER SEMANTIC SIMILARITY」段，帮助审稿聚焦最相似论文对（EmbeddingGemma-2 不可用时优雅降级，不嵌入、不阻塞）。
+- 依赖 `litert-lm-api` + `ai-edge-litert`（LiteRT-LM 格式 `.litertlm`，**非** transformers/sentence-transformers）；封装 `embeddinggemma.py`（embed/cosine/semantic_match）软链到 Hermes venv site-packages。
+- **精度限制（务必知晓）**：int4 量化 edge 模型区分度有限（学术文本相似度挤在 0.68-0.80 窄带），适合语义检索/排序，**不适合**绝对阈值判断。定位为「检索辅助」，不承诺精确语义判定。
+
+## EmbeddingGemma-2-Lean 全精度升级 (v1.7.0)
+
+**NEW in v1.7.0**：语义后端升级为全精度 embeddinggemma2-lean（方案 A 落地），并完成跨命名空间迁移验证（方案 B）。
+
+- `cross_paper_semantic.py` 的 `_import_embeddinggemma()` 现在**优先**加载全精度 `embeddinggemma_lean.py`（bf16，flyyinghui/embeddinggemma-2-lean），降级到 int4 `embeddinggemma.py`，都失败则优雅降级（不阻塞）。
+- 新增 `scripts/embeddinggemma_lean.py`（subprocess 调独立 venv，接口对齐 embed/cosine/semantic_match）+ `lean_encode_cli.py`（独立 venv 编码 CLI，位于 EmbeddingGemma2 目录）。
+- **跨命名空间迁移验证（2026-10-20）**：对 cgice_proof_v10.lean（691 声明 / 997 依赖），recall@10 = **0.4112**（openai_math 同分布基线 0.4663），迁移效果良好，可用于用户 SL(6,C) 论文的 Lean 语义一致性核对（F3 辅助层）。
+- 详见 `references/embeddinggemma2-lean-integration.md`。
+
+---
 
 ## Design Rationale
 
@@ -102,7 +122,7 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 
 - "编译状态表述多处同步" / "pending 残留" / "编译通过但正文仍写待编译" / "一处说 pending 一处说 0 errors" — triggers COMPILATION-STATUS HONESTY SYNC: 编译状态诚实性表述分布在多处（§1 标签表 / 具体定理节正文 / 附录 A 核查段），更新为"已编译"时必须 grep 全部变体（pending/not claimed/not asserted/final compilation status/stopped after elaboration/...）并逐处替换，否则内部自相矛盾被 consistency-checker 抓 P0。See `references/compilation-status-honesty-sync-multi-location.md`.
 
-- "deepseek-v4-pro推理，deepseek-v4-flash撰写" / "双LLM模式" / "v4-pro推理 + v4-flash撰写报告" — triggers DUAL-LLM REVIEW MODE: v4-pro thinking 深度推理 → 提取 content（非空则用 content，空则回退 reasoning_content）→ v4-flash(thinking=disabled) 撰写结构化终审报告。两段串行 ~5.5 分钟（v4-pro 28K/302s + v4-flash 8K/17s）。See `references/dual-llm-v4pro-reason-v4flash-write.md`.
+- "deepseek-v4-pro推理，deepseek-flash撰写" / "双LLM模式" / "v4-pro推理 + deepseek-flash撰写报告" — triggers DUAL-LLM REVIEW MODE: v4-pro thinking 深度推理 → 提取 content（非空则用 content，空则回退 reasoning_content）→ deepseek-flash(thinking=disabled) 撰写结构化终审报告。两段串行 ~5.5 分钟（v4-pro 28K/302s + deepseek-flash 8K/17s）。See `references/dual-llm-v4pro-reason-v4flash-write.md`.
 
 - "三阶段是否遵循CGICE方程" / "语言借用vs方程遵循" / "动力学遵循度" / "以CGICE基准审查" / "子论文是否由母框架方程驱动" — triggers CGICE-BASELINE PHASE-COMPLIANCE REVIEW: 跨论文审查维度，区分「语言借用(language borrowing)」vs「方程遵循(equation following)」，三阶段各判 follows/partial/language_only。标志性红旗「closed dynamical system replacing ΛCDM」+ 诚实标注与过强措辞并存。See `references/cgice-baseline-phase-compliance-review.md`。
 
@@ -128,7 +148,7 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 - "清除历史版本残留" / "参考文献重建" / "公理计数统一" / "投稿前清理 md+lean" / "把关键公式标注序号" — triggers PREPRINT-SUBMISSION CLEANUP: 投稿前清理完整方法论——历史版本残留清除（[Vxx correction]/WITHDRAWN/日期戳/审查记录段落，含小写 withdrawn 保留、附录误删恢复）、参考文献重建（范围引用展开/幻影 vs 孤儿/作者名补编号）、公理计数统一（多重矛盾口径→实测）、纯文本 md 公式编号（字母后缀乱序→连续重排的精确替换法见 references/equation-renumbering-letter-suffix-to-sequential.md）、lean 注释清理 + 活跃代码完整性验证。See `references/preprint-submission-cleanup.md`. 三类痕迹精确分类（历史版本/修改时间/修改错误）+ 删工作日志留诚实声明(withdrawn/not an active declaration)的判断原则 + str.replace 改写句子产生重复的陷阱（new_string 带入原文后续内容，Cosmic Noon 案例）：`references/revision-mark-cleanup-rewrite-duplication.md`.
 
 - "删除修正过去版本内容的论述" / "按PRD体例重构" / "精简版本修正论述" / "优化科技论文文字" / "投稿前清理" — triggers VERSION-COMMENTARY STRIP + PRD RECONSTRUCTION: the pre-review cleanup workflow — strip [V17 FIX]/[WITHDRAWN]/date-stamps/cross-refs/honest-axiom notes, resolve the contradictions the commentary was masking (fossilized-GW vs withdrawn DM=GW, dual numeric values), rebuild to standard PRD skeleton, THEN run the 5-agent review. See `references/version-commentary-strip-prd-reconstruction.md`. Single API call with 8-axis matrix + 5-section output. Use when user explicitly requests v4-pro or cross-paper consistency audit across 3+ papers. See `references/v4pro-multi-paper-cross-review.md`.
-- "系列论文审查" / "统一框架文档" / "母框架" / "跨论文参数不一致" / "同一系列多篇论文" — triggers UMBRELLA-FRAMEWORK PREREQUISITE: 审查共享同一理论框架的系列论文前，必须先查找并加载母框架文档，否则会把框架内角色分工（UV/IR 跑动两端、双分量谱隙、双实形式）误判为跨论文 P0 矛盾。另含 v4-flash 幻觉论文编号 + 审计脚本嵌套块注释 sorry 假阳性两个陷阱。See `references/multi-paper-umbrella-framework-prerequisite.md`.
+- "系列论文审查" / "统一框架文档" / "母框架" / "跨论文参数不一致" / "同一系列多篇论文" — triggers UMBRELLA-FRAMEWORK PREREQUISITE: 审查共享同一理论框架的系列论文前，必须先查找并加载母框架文档，否则会把框架内角色分工（UV/IR 跑动两端、双分量谱隙、双实形式）误判为跨论文 P0 矛盾。另含 deepseek-flash 幻觉论文编号 + 审计脚本嵌套块注释 sorry 假阳性两个陷阱。See `references/multi-paper-umbrella-framework-prerequisite.md`.
 - "表演性诚实" / "honest-axiom 是注释不是属性" / "公理计数矛盾" / "revision 只是加标签" — triggers PERFORMATIVE-HONESTY DETECTION: check whether claimed `@[honest_axiom]`/`@[phenomenological]` attributes are REAL Lean attributes or commented-out text, recount axiom/line stats against the actual file, verify circularity wasn't just migrated axiom→def. See `references/performative-honesty-detection.md`.
 
 - "诚实化只落在正文" / "正文已诚实但Lean未同步" / "body-Lean divergence" / "honestification asymmetry" / "正文写-2ℓt但Lean仍-ℓt" / "保守Metzler谱界" / "迹配对不正定" — triggers HONESTIFICATION-ASYMMETRY DETECTION: 当诚实性评分(7.5)≈技术/形式化评分(3.5-4.5)的2倍时，诚实化只落在正文文字层、未传导到Lean代码层。检测：正文每处"已修正"值，grep Lean的旧值（如正文 e^{-2ℓt} vs Lean exp(-ell*t)）。附带可复用数学事实：保守Metzler生成元(列和为零)谱界=0(主特征值≠5.47)；B=Re tr(XY)在sl(6,C)上不正定(须限su(6)用⟨X,Y⟩=-Re tr(XY))。See `references/honestification-asymmetry-body-vs-lean.md`.
@@ -153,7 +173,7 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 - "分支比闭合矛盾" / "存在性定理吸收观测量" / "反向工程自由参数" / "语言借用还是方程遵循" / "三阶段遵循CGICE吗" / "跨论文动力学遵循度" / "内部一致性 vs 动力学遵循度" — triggers CROSS-PAPER DYNAMICS-COMPLIANCE REVIEW: three dimensions — (1) 存在性参数化≠动力学闭合（参数定义式把待解释观测量写进分子反解=反向工程，即便 Lean 代数 0 sorry；存在性定理平凡=任何目标值可被一个自由参数吸收）；(2) 语言借用 vs 方程遵循（子论文每个因果箭头逐条判 follows/partial/language_only，是否母方程直接推论）；(3) 双维度评分区分（内部一致性 6.5 ≠ 跨论文动力学遵循度 4.8，报告须显式区分两个维度）。See `references/cross-paper-dynamics-compliance-review.md`.
 - "η_k 是 72/35 还是 36/35" / "异常维度归一化" / "g_TC 是 FRG 定点还是 D1 耦合" / "三个谱对象" / "λ_∥ vs λ₁ vs λ_⊥ 混同" / "SL6C 参数对齐" — triggers SL6C PARAMETER ALIGNMENT: 重构/审查 SL(6,C) 系列时，η_k 权威值 = 36/35（Hermitian 约定 C_A=h^∨=6，NOT 72/35=Killing 约定）；g_TC 双值区分（FRG 定点 g*≈1.8395=12π²/35 vs D1 瞬子耦合 2.60=24π²/35，"2.60 不是 FRG 定点"）；三谱对象区分（λ_∥=35 自由 Laplacian 谱底 / λ₁≥29 Witten 隙 / λ_⊥=35/3 独立匹配输入，绝不混同）。See `references/sl6c-parameter-alignment-v18-cgice-20260917.md`（含 V18 公理架构 A-F、定理状态表、Lean 计数 80/151/43/113）。
 - "整合四篇论文到统一框架" / "同步框架文档统计表" / "把框架文档对齐到论文最新状态" / "框架文档 Lean 统计表过时" — triggers FRAMEWORK-DOC SYNC: 独立实测每个 Lean 文件的活跃声明数（含 `@[...]` 装饰器前缀的正则），对账"论文自报 vs 实测"，区分版本漂移/复核一致/口径差异，用整行锚定精确替换（禁止全局裸数字替换），密度列随行数重算。See `references/paper-self-reported-vs-measured-framework-sync.md`.
-- "多论文评分表" / "幻觉论文编号" / "漏掉某篇论文" — PITFALL: v4-flash generating a multi-paper score table HALLUCINATES paper labels (real case: dropped CGICE V9.1, invented a non-existent "V18", mislabeled each paper's role). Fix: in the review prompt, enumerate every paper by exact name + role + key params (e.g. "1. CGICE V9.1 = dynamics core, 73 axioms; 2. V17 = geometry base..."), and require the score table to cover EXACTLY those N names. Verify the table has N rows before saving.
+- "多论文评分表" / "幻觉论文编号" / "漏掉某篇论文" — PITFALL: deepseek-flash generating a multi-paper score table HALLUCINATES paper labels (real case: dropped CGICE V9.1, invented a non-existent "V18", mislabeled each paper's role). Fix: in the review prompt, enumerate every paper by exact name + role + key params (e.g. "1. CGICE V9.1 = dynamics core, 73 axioms; 2. V17 = geometry base..."), and require the score table to cover EXACTLY those N names. Verify the table has N rows before saving.
 - "对所有具体数学计算结论是否准确给出评审" / "数学计算结论准确性" / "数值是否算对" / "verify all numerical/calculation conclusions" — triggers MATH-CALCULATION-ACCURACY REVIEW: extract every numerical claim (incl. table cells + Lean numeric-assertion comments), independently recompute each (Python precise calc + hand algebra), classify into ✅arithmetic-correct / 🔴P0 calc-error / 🟠P1 internal-inconsistency / 🟡P2 statement. Core insight: definitional arithmetic (τ, α reciprocity, ln values, powers) is almost always right; numbers carrying physical predictions (N_e, g_TC flow, Landau pole, μ_crit, |ρ|², H₀t₀) are where errors cluster. See `references/math-calculation-accuracy-review.md`.
 - "import 属性文件缺失" / "@[honest_axiom] 但注册文件不存在" / "表演性诚实 v2" / "import HonestAttr" / "红移公式反推" / "f = f₀·e^(-N_e)" / "指数衰减差数量级" — triggers IMPORT-GHOST-ATTRIBUTE + REDSHIFT-REVERSE-CHECK: (a) 表演性诚实新变体——@[honest_axiom] 从注释升级为活跃属性 + 头加 `import HonestAttr`，但 HonestAttr.lean 注册文件不存在→无法编译+属性未注册；三步检测(grep import→find 注册文件→编译验证)。(b) 指数红移公式 f_obs=f₀·e^(-N_e) 的独立重算 + 反推 N_e=ln(f₀/f_obs) 对比论文声称值，差数量级即"校准伪装成推导+算术错误"。See `references/import-ghost-attribute-and-redshift-reverse-check.md`.
 - "维度不闭合" / "multiplicity 维度账" / "restricted root multiplicity" / "对称空间维数" / "正根数" — triggers SYMMETRIC-SPACE DIMENSION FALSE-POSITIVE: 审稿人声称维度不闭合时，先独立重算 dim = rank + 正根数×multiplicity（A_n 正根数 = n(n+1)/2，不是 rank；SL(6,C)/SU(6) = 5 + 15×2 = 35 闭合）。See `references/symmetric-space-dimension-false-positive.md`.
@@ -221,7 +241,7 @@ Stage 6:  PROCESS SUMMARY   [ARS process record]
 - 对每条引用 `[N]`，检查参考文献列表是否存在对应条目。
 - 对每条参考文献，检查 DOI/arXiv 编号是否可解析（若工具可用）。
 - 幻影引用（正文引用但列表无）判 **P0**；列表有但正文未引用判 **P2**。
-- 警惕 v4-flash 幻觉论文编号（见 `references/multi-paper-umbrella-framework-prerequisite.md`）。
+- 警惕 deepseek-flash 幻觉论文编号（见 `references/multi-paper-umbrella-framework-prerequisite.md`）。
 
 **B3. 校准伪装成推导检测 (Calibration-Disguised-as-Derivation)**
 - 检查每个"推导得到"的数值：其上游是否有独立的第一性原理链条，还是反向从观测值反推参数。
@@ -471,6 +491,109 @@ F-Table7 通过判定: 三项全开且无 P0 → PASS; 任一项 SKIPPED/BLOCKED
 - **N12 claim-bearing 连接散文**：关系从句静默附加可核查事实（"their best-fit model carries 的趋势"）——一致性 pass 必须覆盖数字周围的连接散文，不只数字本身。
 - **N13 标识符完整性双向**：看似正确的标识符可能错、看似错的可能对——注册机构迁移前缀，带陌生前缀的 DOI 可能是真的、"canonical" 形式反而不再解析。归一化到熟悉形式前必须 resolve 两个候选；奇数者获胜时留 dated do-not-fix 注释。裸整数出现在该引用的位置可能是 citation-command misfire（numeric-style \citealp 输出"(cf. 9)"）——查书目渲染后再怀疑手打数字。
 - 完整 13 条 checklist 见 `references/prose-lint-honesty-number-discipline.md`。
+
+## 规则组 G：论文类型识别与差异化审稿标准（v1.6 新增）
+
+> 本组规则解决一类系统性误判：审稿代理未先识别论文类型，直接用「独立理论论文」标准审「桥接/衔接论文」，因"未独立推导母框架"给出低分 REJECT。规则 G 必须在规则组 A-E 评分之前执行——**先定类型，再定标准，最后打分**。类型识别错误 = 后续所有 severity 判定失效。
+
+---
+
+### G-1 论文类型识别（Paper-Type Identification）
+
+**触发条件（grep 关键词，命中 ≥2 即须执行类型判定）：**
+- 桥接/衔接信号：`bridging`、`bridge`、`衔接`、`桥接`、`interface`、`接口`、`mapping to`、`reduces to`、`special case of`、`embedding`、`嵌入`、`母框架`、`parent framework`、`umbrella`、`unifying`、`统一框架`、`we show X is a special case`、`recover the known limit`、`sanity check against`
+- 独立理论信号：`we derive`、`we propose a new`、`独立推导`、`first-principles`、`from scratch`、`novel Lagrangian/Hamiltonian`、`we construct`
+- 预印本占位信号：`placeholder`、`占位`、`preliminary`、`draft`、`to be completed`、`TBD`、`work in progress`、`v0.`、`internal note`、`未完成`
+
+**判定流程（checklist）：**
+- [ ] G-1.1 论文是否以「已有母框架 + 将其落到具体模型/情形」为主贡献？→ 桥接论文（bridging）
+- [ ] G-1.2 论文是否从第一性原理独立构造新理论体系？→ 独立理论论文（independent）
+- [ ] G-1.3 论文是否明确声明为未完成占位/草稿？→ 预印本占位（placeholder）
+- [ ] G-1.4 混合型（部分桥接 + 部分独立增量）→ 标注 `hybrid`，分别适用 G-2 与独立标准
+- [ ] G-1.5 类型判定须写入审稿首段，格式：`Paper-Type: [bridging|independent|placeholder|hybrid]，证据：<引用原文位置>`
+
+**反触发条件（防误伤）：**
+- 论文含 `reduces to`/`special case` 但**同时**有独立新推导 → 不得仅判 bridging，须标 hybrid
+- 论文自述 "we do not re-derive the parent framework" → 这是**诚实声明**，不是缺陷，不得据此扣分
+- 预印本占位若作者明确标注 `placeholder` → 按 G-3 处理，**禁止**用正式论文完整性标准打分
+
+**Severity：** P0（类型误判为最高优先级错误，一旦发生须回滚全部评分）
+**证据门槛：** 须引用 ≥2 处原文（标题/摘要/引言）支撑类型判定；仅凭单一关键词不得定类型。
+
+---
+
+### G-2 桥接论文差异化审稿标准（Differential Review Standard for Bridging Papers）
+
+**触发条件：** G-1 判定为 `bridging` 或 `hybrid`。
+
+**审稿维度（仅审以下四项，禁止套用独立理论标准）：**
+- [ ] G-2.1 **衔接正确性（interface correctness）**：母框架 → 具体模型的映射是否数学/逻辑自洽？极限是否 recover 母框架已知结果（`sanity check`）？→ 检查 `reduces to`、`limit`、`consistency` 段落
+- [ ] G-2.2 **独有增量（unique increment）**：桥接本身带来的新内容（新适用域、新可观测预言、新计算）是否清晰列出？→ 检查 `new prediction`、`novel application`、`we further obtain`
+- [ ] G-2.3 **分工清晰度（division of labor）**：哪些来自母框架、哪些是本文新增，是否显式区分？→ 检查 `inherited from`、`due to [parent]`、`our contribution`
+- [ ] G-2.4 **诚实度（honesty）**：是否如实声明"未独立推导母框架"而非伪装成独立理论？→ 检查 `we assume`、`taking as given`、`building on`
+
+**明确禁止的误判（反触发条件）：**
+- ❌ 因"未独立推导母框架"扣分 → **合法**，桥接论文本就不要求重推母框架
+- ❌ 因"缺乏第一性原理构造"判 REJECT → 违反差异化标准
+- ❌ 要求桥接论文提供母框架的完整推导 → 超出论文范围
+- ✅ 仅当 G-2.1~G-2.4 任一**实质失败**（如映射不自洽、增量为零、分工混淆、伪装独立）才可扣分
+
+**评分锚定：** 桥接论文的 10 分制应基于「衔接质量 + 增量价值」，不得以独立理论论文的"原创性"维度主导。若审稿代理给出 ≤5 分，须显式说明是 G-2.1~G-2.4 中哪一项失败。
+
+**Severity：** P0（误用独立标准 = 系统性误判）；单项失败按 P1 计
+**证据门槛：** 每个维度判定须引用原文；"增量不足"须证明作者未列出任何新预言/新适用域，而非"增量不够大"。
+
+---
+
+### G-3 预印本占位识别（Placeholder / Preprint Handling）
+
+**触发条件：** G-1 命中 placeholder 信号 ≥2，或作者显式声明 `draft`/`placeholder`/`work in progress`。
+
+**处理规则：**
+- [ ] G-3.1 占位论文**不进入**正式完整性/严谨性评分流程
+- [ ] G-3.2 仅审「已声明范围」内的内容；未完成部分标 `N/A (placeholder)`，不计入分母
+- [ ] G-3.3 输出格式须含 `Review-Scope: placeholder-aware`，并列出被排除的章节
+- [ ] G-3.4 若占位论文含**已完成的桥接片段**，该片段可适用 G-2 标准
+
+**反触发条件：**
+- 作者未声明占位但内容明显残缺 → 先按 G-1.3 询问/标注，**不得**直接按正式论文判 REJECT
+- 占位 ≠ 低质量；不得因"未完成"本身扣分，只审已完成部分的质量
+
+**Severity：** P1（误用正式标准审占位 = 中度误判）
+**证据门槛：** 须引用作者显式声明或 ≥2 处 `TBD`/`placeholder` 原文。
+
+---
+
+### G-4 自引用区分：接口规范 vs 独立物理支持（Self-Citation: Interface Spec vs Independent Physics）
+
+**触发条件（grep）：** 论文引用自身前作且用于支撑关键论断，关键词：`we previously showed`、`as shown in our`、`see Ref. [self]`、`我们先前`、`本组前作`、`following our earlier work`、`consistent with our`、`as established in`。
+
+**区分 checklist：**
+- [ ] G-4.1 **接口规范型自引（合法）**：自引仅用于定义约定/记号/接口/母框架设定（`conventions`、`notation`、`setup`、`framework definition`）→ **合法**，不判过度声称
+- [ ] G-4.2 **独立物理支持型自引（须警惕）**：自引被当作关键物理结论的**唯一**证据（`proves`、`confirms`、`establishes`、`验证`、`证实`）→ 须检查是否有独立于自引的支撑
+- [ ] G-4.3 **过度声称检测**：若 G-4.2 且无独立验证 → 标 `overclaim via self-citation`，要求作者补充独立证据或降级措辞
+- [ ] G-4.4 **反向误判防护**：不得把 G-4.1 接口规范型自引误判为"缺乏独立验证"或"过度声称"
+
+**反触发条件（防误伤）：**
+- ✅ 自引用于**记号/约定/母框架定义** → 合法，禁止判过度声称
+- ✅ 桥接论文自引母框架 → 属 G-2.3 分工声明，合法
+- ❌ 仅当自引是**关键物理断言的唯一支撑**且措辞为"证实/证明"时才判 P1
+- ❌ 不得因"引用了自己的论文"本身扣分
+
+**Severity：** G-4.3 过度声称 = P1；G-4.4 误判接口规范 = P0（误伤合法引用）
+**证据门槛：** 须同时引用 (a) 自引位置 与 (b) 被支撑的物理断言原文；仅凭"有自引"不得判过度声称。
+
+---
+
+### G-5 规则组执行顺序与回滚（Execution Order & Rollback）
+
+- [ ] G-5.1 执行顺序：**G-1 类型识别 → G-3 占位分流 → G-2/G-4 差异化审 → 规则组 A-E 评分**
+- [ ] G-5.2 若事后发现类型误判（如把 bridging 当 independent 打分）→ 触发**回滚**：撤销 A-E 评分，按正确类型重审
+- [ ] G-5.3 审稿输出首段强制字段：`Paper-Type:` + `Review-Standard:` + `Review-Scope:`
+- [ ] G-5.4 任何 ≤5/10 的评分须附「类型-标准匹配声明」，否则该评分无效
+
+**Severity：** P0（顺序错误或缺失类型声明 = 审稿流程无效）
+**证据门槛：** 输出须含上述三字段，缺一即判流程不合规。
 
 ## 输出格式 (Finding Output Format) — v1.1 新增
 
@@ -736,7 +859,7 @@ idea-level 重建（含 `unresolvable` 升级项与 <6/10 判定项）必须遵�
 3. **每次 gate 判定留痕**：`{轮次, 综合分, 各 P0–P3 计数, gate 判定, 触发的动作}`
 4. **版本新鲜度前置检查**：跑 gate 前先确认 agent 读到的文件版本 = 用户指定版本（Pitfall 15 / Pitfall 13），陈旧文件导致的分偏差不作数
 5. **超轮次例外**：`max_rounds=2` 用尽仍落在 6–8 → 按 <6 处理（转 idea-level），不再加轮次
-6. **高风险单一模型偏差**：若综合分仅由 v4-pro/v4-flash 单模型给出且落在 7–8 边界区间，建议补一道 held-out 终审再定 PASS/REVISE（历史上存在「v4-pro 单独审计 9/10 实际 2/10」的失准记录）
+6. **高风险单一模型偏差**：若综合分仅由 v4-pro/deepseek-flash 单模型给出且落在 7–8 边界区间，建议补一道 held-out 终审再定 PASS/REVISE（历史上存在「v4-pro 单独审计 9/10 实际 2/10」的失准记录）
 
 ## Innovation-Correctness Gap Analysis (NEW v1.1)
 
@@ -769,7 +892,7 @@ ScientistTwo 论文的四个可移植机制（Rebuttal 闭环 / CoE 四维审计
 | `references/false-proposition-axiom-detection.md` | **⭐ NEW — 假公理三型检测** — 假命题公理(∀量化写错可证False)/假实数等式公理(exp精确值不等,norm_num盲区)/零内容公理(1=1命名成定理)。CGICE V9.1 终审 2026-08-19 |
 | `references/v4pro-multi-paper-cross-review.md` | **⭐ NEW — v4-pro Multi-Paper Cross-Review** — 6-step protocol for 3+ paper cross-review with v4-pro: extraction→prompt build (<50K chars)→v4-pro API (max_tokens=32768)→8-axis matrix→5-section output. ~160s. (2026-08-07) |
 | `references/axiom-consistency-audit-patterns.md` | **⭐ NEW — 公理体系自洽性审计** — 8 模式：可证 False(爆炸原理)/矛盾迁移/表演性诚实(@[honest_axiom]注释文本)/公理计数失守/公理重述当证明/非紧空间离散谱错误/流形标量占位/声称verified但定理不存在 + Lean最小文件编译复现矛盾技术 (2026-08-16) |
-| `references/multi-paper-v4flash-thinking-review.md` | **⭐ NEW — Multi-paper V4-Flash <user>ing Review** — Single-API-call alternative for 3+ paper cross-review. ~4 min, 48K reasoning. (2026-08-06) |
+| `references/multi-paper-v4flash-thinking-review.md` | **⭐ NEW — Multi-paper V4-Flash Thinking Review** — Single-API-call alternative for 3+ paper cross-review. ~4 min, 48K reasoning. (2026-08-06) |
 | `references/cross-paper-gw-consistency-audit.md` | **⭐ NEW — Cross-paper GW consistency audit** — 8-axis checklist for SL(6,C) trilogy, 3 common failure patterns, V63→V17 case study (2026-08-06) |
 | `references/section-alignment-v4pro-docx.md` | **⭐ NEW — Section realignment workflow** — v4-pro rewrite + DOCX insertion for diverged papers, pitfall catalog (2026-08-06) |
 | `references/v14-to-v16-iterative-fix-pipeline.md` | **⭐ NEW — V14→V15→V16 三版迭代修复** — regression引入检测、header-code漂移、尺度不匹配、双轨同步协议 (2026-08-06) |
@@ -793,7 +916,7 @@ ScientistTwo 论文的四个可移植机制（Rebuttal 闭环 / CoE 四维审计
 | `references/brain-memory-knowledge-framework-synthesis.md` | **NEW** — Brain+memory→comprehensive MD: multi-source retrieval, 6-section structure, LaTeX+ASCII diagrams (2026-07-28) |
 | `references/docx-translation-image-embedding-fix.md` | **NEW** — DOCX translation image loss fix: 5-step ZIP-level protocol to re-embed images after python-docx rebuild (2026-08-03) |
 | `references/comparative-two-paper-review.md` | **NEW** — Comparative 2-paper review: 5 agents in 2 batches for cross-paper consistency, rigor, testability, publication strategy, and mutual learning assessment (2026-08-01) |
-| `references/dual-path-theory-comparative-roadmap.md` | **NEW** — Dual-path theoretical framework comparative analysis+roadmap: 5-stage pipeline (load foundation→gather evidence→deep reasoning with v4-flash thinking→synthesis→deliver), 6-dimension scoring, cross-pollination mapping, moduli space contradiction detection (2026-08-04) |
+| `references/dual-path-theory-comparative-roadmap.md` | **NEW** — Dual-path theoretical framework comparative analysis+roadmap: 5-stage pipeline (load foundation→gather evidence→deep reasoning with deepseek-flash thinking→synthesis→deliver), 6-dimension scoring, cross-pollination mapping, moduli space contradiction detection (2026-08-04) |
 | `references/paper-plus-lean-final-review.md` | **NEW** — Paper+Lean 6-agent final review: parallel deploy of consistency+logic+technical+writing+bibliography+lean-specialist. Multi-dimensional scoring, Deng-Hani framework compliance, prioritized P0-P3 fix checklist (2026-07-30) |
 | `references/revision-landing-check-pattern.md` | **NEW** — Revision landing check: automated scan against prior review P0-P3 checklist, fix/partial/unfixed/new-issue classification, Lean stats conflict detection, residual version artifact scan (2026-07-30) |
 | `references/v63-p0fix-final-review-pattern.md` | **NEW** — V63 P0Fix two-stage review: 26-check audit → 5-agent panel (2026-08-04) |
@@ -844,7 +967,7 @@ Full pipeline executed: 5 agents deployed, 12 Critical issues found and fixed, S
 
 Eighteenth verified run. Second-round review of CGICE V9 found that prior "P0 fixes" were header notes appended without changing body text — the paper simultaneously made contradictory claims. 5-agent panel scored 2/10 consistency. V10 applied 9 REAL fixes via comprehensive DeepSeek rewrite (82s) + Lean surgical correction. v4-pro confirmed 9/10. Key pattern: header-only fixes ARE NOT fixes. See `references/cgice-v9-r2-header-only-fix-pattern.md`.
 
-Seventeenth verified run. CGICE V7 paper with 12 P0 + 8 P1 issues from hybrid review. Used comprehensive DeepSeek rewrite protocol: classified fixes → built 12-item fix instruction with exact replacement text for §2.7 → single v4-flash API call (64.3s) → v4-pro audit (7/10). 10/12 P0 FIXED, 2 PARTIAL. Key pattern: replaced iterative patch with one-shot rewrite — dramatically faster and more consistent. Full protocol: `references/comprehensive-rewrite-fix-pipeline.md`.
+Seventeenth verified run. CGICE V7 paper with 12 P0 + 8 P1 issues from hybrid review. Used comprehensive DeepSeek rewrite protocol: classified fixes → built 12-item fix instruction with exact replacement text for §2.7 → single deepseek-flash API call (64.3s) → v4-pro audit (7/10). 10/12 P0 FIXED, 2 PARTIAL. Key pattern: replaced iterative patch with one-shot rewrite — dramatically faster and more consistent. Full protocol: `references/comprehensive-rewrite-fix-pipeline.md`.
 
 ### CGICE V7→V9 Multi-Round Evolution (2026-08-11) ← NEWEST
 
@@ -1135,23 +1258,23 @@ Fix: re-copy the current files + verify line counts + tell each agent the expect
 deploying. Full recipe: `references/stale-file-version-mismatch.md`.
 
 
-### Pitfall 14: v4-pro 全尺寸挂死 + v4-flash Content 空 (2026-08-07)
+### Pitfall 14: v4-pro 全尺寸挂死 + deepseek-flash Content 空 (2026-08-07)
 
 v4-pro 对 5.5K chars 的 prompt 也会挂死——0% CPU、6+ 分钟无响应。旧假设"仅 >120K 挂死"不成立。**v4-pro 对所有审查任务不可靠**。
 
-**替代**: 深度推理用 v4-flash thinking。但可能 token 耗尽致 `content=""`(71K reasoning/0 content)。从 `reasoning_content` 提取结论回退。
+**替代**: 深度推理用 deepseek-flash thinking。但可能 token 耗尽致 `content=""`(71K reasoning/0 content)。从 `reasoning_content` 提取结论回退。
 
-**决策树**: 短 prompt→v4-flash thinking | 中长→v4-flash+thinking=disabled | 任何长度+v4-pro→❌
+**决策树**: 短 prompt→deepseek-flash thinking | 中长→deepseek-flash+thinking=disabled | 任何长度+v4-pro→❌
 
-**执行方式（5 代理终审，2026-08-23 验证）**: 用 terminal + Python 脚本直调 v4-flash API（OpenAI SDK, `extra_body={"thinking": {"type": "disabled"}}`, `max_tokens=8192`, `temperature=0.0`, `timeout=600`, background + notify_on_complete），**不用 delegate_task**——delegate_task 子代理继承主 model（主 agent 是 v4-pro 时子代理也 v4-pro 挂死），且 delegate_task 无 model 参数可覆盖。串行执行（DeepSeek 速率限制，5 代理 ~8 分钟），每个审稿人输出立即写 `/tmp/<name>.part` 防超时丢失。对抗性上下文注入已知 P0 清单，要求 JSON 输出 `known_p0_verdicts` 字段逐条判 `fixed/remain/partial`（而非重新凭空评审）。
+**执行方式（5 代理终审，2026-08-23 验证）**: 用 terminal + Python 脚本直调 deepseek-flash API（OpenAI SDK, `extra_body={"thinking": {"type": "disabled"}}`, `max_tokens=8192`, `temperature=0.0`, `timeout=600`, background + notify_on_complete），**不用 delegate_task**——delegate_task 子代理继承主 model（主 agent 是 v4-pro 时子代理也 v4-pro 挂死），且 delegate_task 无 model 参数可覆盖。串行执行（DeepSeek 速率限制，5 代理 ~8 分钟），每个审稿人输出立即写 `/tmp/<name>.part` 防超时丢失。对抗性上下文注入已知 P0 清单，要求 JSON 输出 `known_p0_verdicts` 字段逐条判 `fixed/remain/partial`（而非重新凭空评审）。
 
 DeepSeek v4-pro has a sharp reliability cliff around prompt size:
 
 | Zone | Prompt Size | Behavior | Recommendation |
 |------|------------|----------|----------------|
 | **Safe** | <50K chars | Reliable, ~160s, deep math reasoning | ✅ Use for cross-paper reviews |
-| **Risky** | 50-100K chars | May hang intermittently | ⚠️ Test first, have v4-flash fallback |
-| **Unsafe** | >120K chars | Silently hangs (no error, no timeout) | ❌ Use v4-flash instead |
+| **Risky** | 50-100K chars | May hang intermittently | ⚠️ Test first, have deepseek-flash fallback |
+| **Unsafe** | >120K chars | Silently hangs (no error, no timeout) | ❌ Use deepseek-flash instead |
 
 **Symptoms of hang**: Zero stdout for >300s, process killed with exit code 143, report file not created.
 

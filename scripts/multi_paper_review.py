@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Multi-paper cross-review template using DeepSeek v4-flash thinking mode.
+"""Multi-paper cross-review template using deepseek-flash thinking mode.
 Usage: modify PAPER_PATHS and AXIOM_DOC, then run."""
 import os, re, json
 from docx import Document
@@ -63,6 +63,24 @@ all_data = {}
 for code, cfg in PAPER_PATHS.items():
     all_data[code] = extract_paper(cfg["docx"], cfg["lean"], cfg["label"])
 
+# ════════════════ CROSS-PAPER SEMANTIC SIMILARITY (EmbeddingGemma-2) ════════════════
+# 可选：用 EmbeddingGemma-2 计算多论文语义相似度矩阵，嵌入审稿 prompt，
+# 帮助审稿聚焦「最相似论文对」（共享概念 / 可能矛盾 / 可能重复）。不可用时降级。
+cross_sem_text = ""
+try:
+    from cross_paper_semantic import cross_paper_similarity
+    _labels = [d["label"] for d in all_data.values()]
+    _texts = [d.get("paper_text", "") for d in all_data.values()]
+    _cross = cross_paper_similarity(_texts, _labels)
+    if _cross.get("available"):
+        cross_sem_text = "## CROSS-PAPER SEMANTIC SIMILARITY (EmbeddingGemma-2)\n"
+        cross_sem_text += "以下论文对语义最相似（共享概念 / 可能矛盾 / 可能重复），交叉审稿时优先核对：\n"
+        for _p in _cross.get("top_pairs", []):
+            cross_sem_text += f"- {_p['a']} <-> {_p['b']}: {_p['score']:.3f}\n"
+        cross_sem_text += "\n"
+except Exception:
+    cross_sem_text = ""  # EmbeddingGemma-2 不可用，优雅降级
+
 prompt = f"""You are an expert mathematical physicist reviewing interconnected papers.
 
 ## REVIEW TASK
@@ -71,7 +89,7 @@ Review for: 1) Mathematical derivation accuracy 2) Numerical self-consistency (p
 ## SHARED FRAMEWORK
 {axiom_text}
 
-## PAPERS
+{cross_sem_text}## PAPERS
 """
 for code, d in all_data.items():
     prompt += f"""
@@ -93,10 +111,10 @@ Focus on mathematical and numerical correctness. Be specific.
 """
 
 # ════════════════════ API CALL ════════════════════
-print(f"Prompt: {len(prompt)} chars. Sending to v4-flash thinking...")
+print(f"Prompt: {len(prompt)} chars. Sending to deepseek-flash thinking...")
 client = OpenAI(api_key=API_KEY, base_url="https://api.deepseek.com")
 resp = client.chat.completions.create(
-    model="deepseek-v4-flash",
+    model="deepseek-flash",
     messages=[{"role": "user", "content": prompt}],
     max_tokens=24576,
     temperature=0.0,
@@ -107,7 +125,7 @@ reasoning = getattr(choice.message, 'reasoning_content', '') or ''
 content = choice.message.content or ''
 
 with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
-    f.write(f"# Multi-Paper Review — V4-Flash <user>ing\n")
+    f.write(f"# Multi-Paper Review — V4-Flash Thinking\n")
     f.write(f"Reasoning: {len(reasoning)} chars | Content: {len(content)} chars\n---\n")
     f.write(content)
 
